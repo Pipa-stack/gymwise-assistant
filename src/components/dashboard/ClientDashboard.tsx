@@ -6,6 +6,9 @@ import ClientProgress from "./ClientProgress";
 import DocumentViewer from "./DocumentViewer";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import { CalendarCheck, TrendingUp, FileText, ArrowUpRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 interface ClientDashboardProps {
   client: Client;
@@ -13,6 +16,7 @@ interface ClientDashboardProps {
 }
 
 const ClientDashboard = ({ client, clientSessions }: ClientDashboardProps) => {
+  const navigate = useNavigate();
   const nextClientSession = clientSessions[0];
   const trainingDays = Math.ceil(
     Math.abs(new Date().getTime() - new Date(client.startDate).getTime()) / (1000 * 60 * 60 * 24)
@@ -111,13 +115,49 @@ const ClientDashboard = ({ client, clientSessions }: ClientDashboardProps) => {
     }
   ];
   
+  // Calculate completion percentage
+  const completionPercentage = client.progress 
+    ? Math.min(Math.round((client.progress.length / 10) * 100), 100) 
+    : 0;
+  
   return (
     <div className="space-y-8 animate-fade-in">
-      <div className="flex flex-col space-y-2">
-        <h2 className="text-3xl font-bold tracking-tight">Mi Dashboard</h2>
-        <p className="text-muted-foreground">
-          Bienvenido, {client.name}. Aquí tienes tu resumen.
-        </p>
+      {/* Hero Section with progress */}
+      <div className="rounded-lg bg-gradient-to-r from-primary/20 via-primary/5 to-transparent p-6 border shadow-sm">
+        <div className="flex flex-col md:flex-row justify-between gap-4">
+          <div className="space-y-2">
+            <h2 className="text-3xl font-bold tracking-tight">¡Hola, {client.name.split(' ')[0]}!</h2>
+            <p className="text-muted-foreground max-w-lg">
+              Bienvenido a tu panel personal. Llevas {trainingDays} días entrenando con nosotros. ¡Sigue así!
+            </p>
+            <div className="flex gap-3 pt-2">
+              <Button onClick={() => navigate("/calendar")}>
+                <CalendarCheck className="mr-2 h-4 w-4" />
+                Reservar Sesión
+              </Button>
+              <Button variant="outline" onClick={() => navigate("/stats")}>
+                <TrendingUp className="mr-2 h-4 w-4" />
+                Ver Progreso
+              </Button>
+            </div>
+          </div>
+          
+          <div className="p-4 bg-card rounded-lg shadow-sm border border-border/50 min-w-[200px]">
+            <div className="text-center mb-2">
+              <div className="font-medium">Progreso Global</div>
+              <div className="text-3xl font-bold text-primary">{completionPercentage}%</div>
+            </div>
+            <div className="h-3 w-full bg-secondary rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-primary rounded-full transition-all duration-700 ease-in-out" 
+                style={{ width: `${completionPercentage}%` }}
+              ></div>
+            </div>
+            <div className="mt-2 text-xs text-muted-foreground text-center">
+              Objetivo: {client.goal}
+            </div>
+          </div>
+        </div>
       </div>
 
       <ClientStatsCards 
@@ -133,7 +173,17 @@ const ClientDashboard = ({ client, clientSessions }: ClientDashboardProps) => {
         <ClientProgress progress={client.progress || []} />
       </div>
       
-      <div className="grid gap-6 md:grid-cols-12">
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-semibold flex items-center">
+            <FileText className="mr-2 h-5 w-5 text-primary" />
+            Recursos y Documentos
+          </h3>
+          <Button variant="ghost" className="gap-1" onClick={() => navigate("/training-plans")}>
+            Ver Todo
+            <ArrowUpRight className="h-4 w-4" />
+          </Button>
+        </div>
         <DocumentViewer documents={sampleDocuments} />
       </div>
     </div>
