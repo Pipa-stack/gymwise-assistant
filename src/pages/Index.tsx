@@ -20,6 +20,17 @@ const Index = () => {
     (session) => isToday(new Date(session.date)) && session.status === "scheduled"
   );
   
+  // Add a subtle animation effect
+  useEffect(() => {
+    const elements = document.querySelectorAll('.animate-on-mount');
+    elements.forEach((element, index) => {
+      setTimeout(() => {
+        element.classList.add('opacity-100', 'translate-y-0');
+        element.classList.remove('opacity-0', 'translate-y-4');
+      }, 100 * index);
+    });
+  }, []);
+  
   if (mode === "trainer") {
     return (
       <TrainerDashboard 

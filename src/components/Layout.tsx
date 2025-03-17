@@ -21,7 +21,7 @@ const Layout = ({ children }: LayoutProps) => {
     const timeout = setTimeout(() => {
       setContent(children);
       setIsPageTransitioning(false);
-    }, 300);
+    }, 350);
     
     return () => clearTimeout(timeout);
   }, [location.pathname, children]);
@@ -30,8 +30,8 @@ const Layout = ({ children }: LayoutProps) => {
     return (
       <div className="flex h-screen w-screen items-center justify-center bg-background">
         <div className="space-y-4 text-center">
-          <div className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
-          <p className="text-muted-foreground animate-pulse">Cargando GymWise...</p>
+          <div className="inline-block h-14 w-14 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+          <p className="text-lg text-muted-foreground animate-pulse">Cargando GymWise...</p>
         </div>
       </div>
     );
@@ -41,8 +41,8 @@ const Layout = ({ children }: LayoutProps) => {
     <div className="flex min-h-screen flex-col bg-background">
       <Navbar />
       <main className={cn(
-        "flex-1 px-4 py-8 md:px-8 lg:px-12 transition-all duration-300 ease-in-out",
-        isPageTransitioning ? "opacity-0 translate-y-4" : "opacity-100 translate-y-0"
+        "flex-1 px-4 py-8 md:px-8 lg:px-12 transition-all duration-500 ease-out",
+        isPageTransitioning ? "opacity-0 translate-y-6" : "opacity-100 translate-y-0"
       )}>
         <div className="mx-auto w-full max-w-7xl">
           {content}
