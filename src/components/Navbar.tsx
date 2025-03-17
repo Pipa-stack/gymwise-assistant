@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAppContext } from "@/context/AppContext";
@@ -49,7 +48,7 @@ const Navbar = () => {
   const navLinksClient = [
     { name: "Dashboard", path: "/", icon: <Home className="h-5 w-5" /> },
     { name: "Mi Perfil", path: "/profile", icon: <User className="h-5 w-5" /> },
-    { name: "Mi Plan", path: "/my-plan", icon: <Dumbbell className="h-5 w-5" /> },
+    { name: "Mi Plan", path: "/training-plans", icon: <Dumbbell className="h-5 w-5" /> },
     { name: "Ejercicios", path: "/exercises", icon: <Dumbbell className="h-5 w-5" /> },
     { name: "Calendario", path: "/calendar", icon: <Calendar className="h-5 w-5" /> },
     { name: "Nutrición", path: "/nutrition", icon: <Apple className="h-5 w-5" /> },
