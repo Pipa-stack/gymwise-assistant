@@ -11,6 +11,7 @@ import Clients from "./pages/Clients";
 import ClientDetail from "./pages/ClientDetail";
 import TrainingPlans from "./pages/TrainingPlans";
 import Exercises from "./pages/Exercises";
+import ExerciseLibrary from "./pages/ExerciseLibrary";
 import Calendar from "./pages/Calendar";
 import Chat from "./pages/Chat";
 import Stats from "./pages/Stats";
@@ -18,6 +19,7 @@ import Profile from "./pages/Profile";
 import Nutrition from "./pages/Nutrition";
 import TechniqueAnalysis from "./pages/TechniqueAnalysis";
 import Achievements from "./pages/Achievements";
+import Social from "./pages/Social";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -36,6 +38,7 @@ const App = () => (
               <Route path="/clients/:clientId" element={<ClientDetail />} />
               <Route path="/training-plans" element={<TrainingPlans />} />
               <Route path="/exercises" element={<Exercises />} />
+              <Route path="/exercise-library" element={<ExerciseLibrary />} />
               <Route path="/calendar" element={<Calendar />} />
               <Route path="/chat" element={<Chat />} />
               <Route path="/stats" element={<Stats />} />
@@ -43,6 +46,7 @@ const App = () => (
               <Route path="/nutrition" element={<Nutrition />} />
               <Route path="/technique" element={<TechniqueAnalysis />} />
               <Route path="/achievements" element={<Achievements />} />
+              <Route path="/social" element={<Social />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Layout>

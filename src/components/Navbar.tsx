@@ -19,7 +19,9 @@ import {
   ClipboardCheck,
   TrendingUp,
   Settings,
-  Award
+  Award,
+  Search,
+  BookOpen
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -47,8 +49,10 @@ const Navbar = () => {
     { name: "Clientes", path: "/clients", icon: <Users className="h-5 w-5" /> },
     { name: "Planes", path: "/training-plans", icon: <ClipboardCheck className="h-5 w-5" /> },
     { name: "Ejercicios", path: "/exercises", icon: <Dumbbell className="h-5 w-5" /> },
+    { name: "Biblioteca", path: "/exercise-library", icon: <BookOpen className="h-5 w-5" /> },
     { name: "Calendario", path: "/calendar", icon: <Calendar className="h-5 w-5" /> },
     { name: "Progreso", path: "/stats", icon: <TrendingUp className="h-5 w-5" /> },
+    { name: "Comunidad", path: "/social", icon: <Users className="h-5 w-5" /> },
     { name: "Logros", path: "/achievements", icon: <Award className="h-5 w-5" /> },
     { name: "Asistente", path: "/chat", icon: <MessageCircle className="h-5 w-5" /> }
   ];
@@ -58,9 +62,11 @@ const Navbar = () => {
     { name: "Mi Perfil", path: "/profile", icon: <User className="h-5 w-5" /> },
     { name: "Mi Plan", path: "/training-plans", icon: <Dumbbell className="h-5 w-5" /> },
     { name: "Ejercicios", path: "/exercises", icon: <Dumbbell className="h-5 w-5" /> },
+    { name: "Biblioteca", path: "/exercise-library", icon: <BookOpen className="h-5 w-5" /> },
     { name: "Calendario", path: "/calendar", icon: <Calendar className="h-5 w-5" /> },
     { name: "Nutrición", path: "/nutrition", icon: <Apple className="h-5 w-5" /> },
     { name: "Técnica", path: "/technique", icon: <Activity className="h-5 w-5" /> },
+    { name: "Comunidad", path: "/social", icon: <Users className="h-5 w-5" /> },
     { name: "Asistente", path: "/chat", icon: <MessageCircle className="h-5 w-5" /> }
   ];
 
