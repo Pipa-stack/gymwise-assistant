@@ -2,8 +2,6 @@
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Search, MapPin, Users, Calendar, BarChart2 } from "lucide-react";
 import FriendProfileCard from "@/components/social/FriendProfileCard";
@@ -140,11 +138,17 @@ const Social = () => {
           
           <div className="mt-6 space-y-6">
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <BarChart2 className="h-5 w-5 text-primary" />
-                  Actividad Reciente
-                </CardTitle>
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <BarChart2 className="h-5 w-5 text-primary" />
+                    Actividad Reciente
+                  </CardTitle>
+                  
+                  <Badge variant="outline" className="ml-2">
+                    Últimas 12 semanas
+                  </Badge>
+                </div>
                 <CardDescription>Horas de entrenamiento por semana</CardDescription>
               </CardHeader>
               <CardContent>
@@ -153,12 +157,12 @@ const Social = () => {
             </Card>
             
             <Card>
-              <CardHeader>
+              <CardHeader className="pb-3">
                 <CardTitle className="flex items-center gap-2">
                   <Calendar className="h-5 w-5 text-primary" />
-                  Rutinas
+                  Rutinas de Entrenamiento
                 </CardTitle>
-                <CardDescription>Rutinas de entrenamiento</CardDescription>
+                <CardDescription>Programas de entrenamiento compartidos</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
