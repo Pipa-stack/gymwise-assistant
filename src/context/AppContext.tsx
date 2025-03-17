@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { toast } from "@/hooks/use-toast";
 import { PdfDocumentProps } from "@/components/dashboard/PdfDocument";
@@ -319,7 +320,7 @@ const generateAvailableSlots = (): AvailableSlot[] => {
 };
 
 export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [mode, setMode] = useState<UserMode>("trainer");
+  const [mode, setMode] = useState<UserMode>("client"); // Changed default mode to "client"
   const [clients, setClients] = useState<Client[]>(sampleClients);
   const [exercises, setExercises] = useState<Exercise[]>(sampleExercises);
   const [trainingPlans, setTrainingPlans] = useState<TrainingPlan[]>(sampleTrainingPlans);
