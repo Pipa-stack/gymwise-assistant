@@ -17,6 +17,7 @@ import Stats from "./pages/Stats";
 import Profile from "./pages/Profile";
 import Nutrition from "./pages/Nutrition";
 import TechniqueAnalysis from "./pages/TechniqueAnalysis";
+import Achievements from "./pages/Achievements";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -41,6 +42,7 @@ const App = () => (
               <Route path="/profile" element={<Profile />} />
               <Route path="/nutrition" element={<Nutrition />} />
               <Route path="/technique" element={<TechniqueAnalysis />} />
+              <Route path="/achievements" element={<Achievements />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Layout>

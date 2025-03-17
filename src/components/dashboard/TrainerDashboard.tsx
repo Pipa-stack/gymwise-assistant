@@ -5,7 +5,7 @@ import { TrainerStatsCards } from "./StatsCards";
 import NextSession from "./NextSession";
 import TodaySessions from "./TodaySessions";
 import RecentClients from "./RecentClients";
-import { ArrowUpRight, Target, LineChart, Users, Dumbbell, Calendar } from "lucide-react";
+import { ArrowUpRight, Target, LineChart, Users, Dumbbell, Calendar, Award, Trophy, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface TrainerDashboardProps {
@@ -158,6 +158,70 @@ const TrainerDashboard = ({
               );
             })}
           </div>
+        </div>
+      </div>
+
+      {/* New Achievements Section */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-semibold flex items-center">
+            <Award className="mr-2 h-5 w-5 text-primary" />
+            Logros Recientes
+          </h3>
+          <Button variant="ghost" size="sm" onClick={() => navigate("/achievements")} className="gap-1 hover:bg-primary/10 rounded-lg">
+            Ver Todos
+            <ArrowUpRight className="h-4 w-4 ml-1" />
+          </Button>
+        </div>
+        <div className="grid gap-4 md:grid-cols-3">
+          <AchievementPreview
+            title="Entrenador Estrella"
+            icon={<Star className="h-8 w-8 text-yellow-400" />}
+            progress={85}
+          />
+          <AchievementPreview
+            title="Mentor de Campeones"
+            icon={<Trophy className="h-8 w-8 text-amber-500" />}
+            progress={60}
+          />
+          <AchievementPreview
+            title="Experto en Nutrición"
+            icon={<Award className="h-8 w-8 text-emerald-500" />}
+            progress={40}
+          />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const AchievementPreview = ({ 
+  title, 
+  icon, 
+  progress 
+}: { 
+  title: string;
+  icon: JSX.Element;
+  progress: number;
+}) => {
+  return (
+    <div className="border rounded-xl p-4 shadow-sm hover:shadow-md transition-all duration-300 bg-card hover:bg-gradient-to-br hover:from-background hover:to-primary/5">
+      <div className="flex items-center gap-3 mb-3">
+        <div className="p-2 rounded-full bg-primary/10">
+          {icon}
+        </div>
+        <h4 className="font-medium">{title}</h4>
+      </div>
+      <div className="space-y-1">
+        <div className="flex justify-between text-xs">
+          <span>Progreso</span>
+          <span className="font-medium">{progress}%</span>
+        </div>
+        <div className="h-2 w-full bg-secondary rounded-full overflow-hidden">
+          <div
+            className="h-full bg-primary rounded-full transition-all duration-700 ease-out"
+            style={{ width: `${progress}%` }}
+          ></div>
         </div>
       </div>
     </div>

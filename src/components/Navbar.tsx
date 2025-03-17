@@ -14,8 +14,12 @@ import {
   LineChart,
   Apple,
   Activity,
-  Flame,
-  Landmark 
+  Flame, 
+  Landmark,
+  ClipboardCheck,
+  TrendingUp,
+  Settings,
+  Award
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -41,10 +45,11 @@ const Navbar = () => {
   const navLinksTrainer = [
     { name: "Dashboard", path: "/", icon: <Home className="h-5 w-5" /> },
     { name: "Clientes", path: "/clients", icon: <Users className="h-5 w-5" /> },
-    { name: "Planes", path: "/training-plans", icon: <Dumbbell className="h-5 w-5" /> },
+    { name: "Planes", path: "/training-plans", icon: <ClipboardCheck className="h-5 w-5" /> },
     { name: "Ejercicios", path: "/exercises", icon: <Dumbbell className="h-5 w-5" /> },
     { name: "Calendario", path: "/calendar", icon: <Calendar className="h-5 w-5" /> },
-    { name: "Estadísticas", path: "/stats", icon: <LineChart className="h-5 w-5" /> },
+    { name: "Progreso", path: "/stats", icon: <TrendingUp className="h-5 w-5" /> },
+    { name: "Logros", path: "/achievements", icon: <Award className="h-5 w-5" /> },
     { name: "Asistente", path: "/chat", icon: <MessageCircle className="h-5 w-5" /> }
   ];
 
