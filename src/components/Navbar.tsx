@@ -14,7 +14,8 @@ import {
   LineChart,
   Apple,
   Activity,
-  Flame 
+  Flame,
+  Landmark 
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -73,10 +74,10 @@ const Navbar = () => {
         <div className="flex items-center space-x-2">
           <Link to="/" className="flex items-center space-x-2">
             <div className="relative h-8 w-8 overflow-hidden rounded-full bg-primary text-primary-foreground">
-              <Flame className="absolute inset-0 m-auto h-5 w-5" />
+              <Landmark className="absolute inset-0 m-auto h-5 w-5" />
             </div>
             <span className="hidden text-xl font-bold sm:inline-block">
-              FitCoach Pro
+              Templo
             </span>
             <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
               {mode === "trainer" ? "Entrenador" : "Cliente"}
