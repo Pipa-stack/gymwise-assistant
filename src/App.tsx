@@ -8,6 +8,7 @@ import { AppContextProvider } from "@/context/AppContext";
 import Layout from "@/components/Layout";
 import Index from "./pages/Index";
 import Clients from "./pages/Clients";
+import ClientDetail from "./pages/ClientDetail";
 import TrainingPlans from "./pages/TrainingPlans";
 import Exercises from "./pages/Exercises";
 import Calendar from "./pages/Calendar";
@@ -31,6 +32,7 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/clients" element={<Clients />} />
+              <Route path="/clients/:clientId" element={<ClientDetail />} />
               <Route path="/training-plans" element={<TrainingPlans />} />
               <Route path="/exercises" element={<Exercises />} />
               <Route path="/calendar" element={<Calendar />} />
