@@ -10,7 +10,10 @@ import {
   MessageCircle, 
   Menu, 
   X,
-  User
+  User,
+  LineChart,
+  Apple,
+  Activity 
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -39,6 +42,7 @@ const Navbar = () => {
     { name: "Planes", path: "/training-plans", icon: <Dumbbell className="h-5 w-5" /> },
     { name: "Ejercicios", path: "/exercises", icon: <Dumbbell className="h-5 w-5" /> },
     { name: "Calendario", path: "/calendar", icon: <Calendar className="h-5 w-5" /> },
+    { name: "Estadísticas", path: "/stats", icon: <LineChart className="h-5 w-5" /> },
     { name: "Asistente", path: "/chat", icon: <MessageCircle className="h-5 w-5" /> }
   ];
 
@@ -48,6 +52,8 @@ const Navbar = () => {
     { name: "Mi Plan", path: "/my-plan", icon: <Dumbbell className="h-5 w-5" /> },
     { name: "Ejercicios", path: "/exercises", icon: <Dumbbell className="h-5 w-5" /> },
     { name: "Calendario", path: "/calendar", icon: <Calendar className="h-5 w-5" /> },
+    { name: "Nutrición", path: "/nutrition", icon: <Apple className="h-5 w-5" /> },
+    { name: "Técnica", path: "/technique", icon: <Activity className="h-5 w-5" /> },
     { name: "Asistente", path: "/chat", icon: <MessageCircle className="h-5 w-5" /> }
   ];
 
