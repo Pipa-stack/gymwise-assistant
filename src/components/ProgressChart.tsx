@@ -10,6 +10,7 @@ import {
   ResponsiveContainer,
   Legend,
   ReferenceLine,
+  Dot,
 } from "recharts";
 import { Progress } from "@/context/AppContext";
 
@@ -25,6 +26,7 @@ const ProgressChart = ({ data, metrics, height = 300 }: ProgressChartProps) => {
       const date = new Date(entry.date);
       return {
         date: `${date.getDate()}/${date.getMonth() + 1}`,
+        fullDate: new Date(entry.date).toLocaleDateString(),
         ...entry,
       };
     });
@@ -50,13 +52,58 @@ const ProgressChart = ({ data, metrics, height = 300 }: ProgressChartProps) => {
     
     metrics.forEach(metric => {
       if (data[0][metric] !== undefined) {
-        const sum = data.reduce((acc, entry) => acc + (Number(entry[metric]) || 0), 0);
-        result[metric] = sum / data.length;
+        const values = data.filter(entry => entry[metric] !== undefined)
+                         .map(entry => Number(entry[metric]) || 0);
+        if (values.length > 0) {
+          const sum = values.reduce((acc, val) => acc + val, 0);
+          result[metric] = sum / values.length;
+        }
       }
     });
     
     return result;
   }, [data, metrics]);
+
+  // Customize tooltip
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-background border border-border p-3 rounded-md shadow-md">
+          <p className="font-medium mb-2">{payload[0]?.payload.fullDate}</p>
+          {payload.map((entry: any, index: number) => (
+            <div key={`tooltip-${index}`} className="flex items-center gap-2 text-sm">
+              <div 
+                className="w-3 h-3 rounded-full" 
+                style={{ backgroundColor: entry.color }}
+              />
+              <span>{entry.name}: <span className="font-medium">{entry.value}</span></span>
+            </div>
+          ))}
+        </div>
+      );
+    }
+    return null;
+  };
+
+  // Custom dot renderer for the most recent point
+  const renderDot = (props: any, dataKey: string) => {
+    const { cx, cy, index } = props;
+    const isLast = index === chartData.length - 1;
+    
+    if (isLast) {
+      return (
+        <Dot
+          cx={cx}
+          cy={cy}
+          r={6}
+          stroke="hsl(var(--background))"
+          strokeWidth={2}
+          fill={colors[dataKey as keyof typeof colors]}
+        />
+      );
+    }
+    return null;
+  };
 
   return (
     <div className="w-full rounded-lg border border-border/60 bg-card p-4 shadow-sm">
@@ -83,15 +130,7 @@ const ProgressChart = ({ data, metrics, height = 300 }: ProgressChartProps) => {
               tickLine={{ stroke: "hsl(var(--border))" }}
               axisLine={{ stroke: "hsl(var(--border))" }}
             />
-            <Tooltip
-              contentStyle={{
-                backgroundColor: "hsl(var(--background))",
-                borderColor: "hsl(var(--border))",
-                borderRadius: "var(--radius)",
-                boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
-              }}
-              labelStyle={{ fontWeight: "bold", marginBottom: "0.5rem" }}
-            />
+            <Tooltip content={<CustomTooltip />} />
             <Legend 
               verticalAlign="top" 
               height={36} 
@@ -113,6 +152,7 @@ const ProgressChart = ({ data, metrics, height = 300 }: ProgressChartProps) => {
                     strokeWidth={2}
                     dot={{ r: 4, strokeWidth: 1, stroke: "hsl(var(--background))" }}
                     animationDuration={1500}
+                    connectNulls={true}
                   />
                   {averages[metric] && (
                     <ReferenceLine 

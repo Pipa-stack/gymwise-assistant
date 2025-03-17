@@ -5,12 +5,15 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, TrendingUp, LineChart } from "lucide-react";
 import ProgressChart from "@/components/ProgressChart";
 import { Progress as ProgressType } from "@/context/AppContext";
+import { generateProgressSummary } from "@/utils/progressUtils";
 
 interface ClientProgressProps {
   progress: ProgressType[];
+  clientName?: string;
+  clientGoal?: string;
 }
 
-const ClientProgress = ({ progress }: ClientProgressProps) => {
+const ClientProgress = ({ progress, clientName, clientGoal }: ClientProgressProps) => {
   const navigate = useNavigate();
   
   return (
@@ -19,9 +22,11 @@ const ClientProgress = ({ progress }: ClientProgressProps) => {
         <div>
           <CardTitle className="flex items-center">
             <TrendingUp className="h-5 w-5 mr-2 text-primary" />
-            Mi Progreso
+            {clientName ? `Progreso de ${clientName}` : "Mi Progreso"}
           </CardTitle>
-          <CardDescription>Seguimiento de peso y composición corporal</CardDescription>
+          <CardDescription>
+            {clientGoal ? `Objetivo: ${clientGoal}` : "Seguimiento de peso y composición corporal"}
+          </CardDescription>
         </div>
         
         <Button variant="outline" size="sm" onClick={() => navigate("/stats")} className="gap-1">
@@ -31,10 +36,26 @@ const ClientProgress = ({ progress }: ClientProgressProps) => {
       </CardHeader>
       <CardContent className="p-4">
         {progress && progress.length > 0 ? (
-          <ProgressChart 
-            data={progress} 
-            metrics={["weight", "bodyFat"]} 
-          />
+          <>
+            <ProgressChart 
+              data={progress} 
+              metrics={["weight", "bodyFat"]} 
+            />
+            {progress.length >= 2 && (
+              <p className="text-sm text-muted-foreground mt-4 px-2">
+                {generateProgressSummary({
+                  id: "temp",
+                  name: clientName || "Cliente",
+                  email: "",
+                  phone: "",
+                  age: 0,
+                  goal: clientGoal || "Fitness",
+                  startDate: "",
+                  progress: progress
+                })}
+              </p>
+            )}
+          </>
         ) : (
           <div className="flex flex-col h-60 items-center justify-center gap-2">
             <div className="w-16 h-16 rounded-full bg-muted/20 flex items-center justify-center">
