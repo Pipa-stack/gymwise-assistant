@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { toast } from "@/hooks/use-toast";
 
@@ -13,6 +12,7 @@ export interface Client {
   age: number;
   goal: string;
   startDate: string;
+  height?: number; // Added height property as optional
   photo?: string;
   progress?: Progress[];
 }
@@ -114,6 +114,7 @@ const sampleClients: Client[] = [
     age: 32,
     goal: "Hipertrofia",
     startDate: "2023-09-15",
+    height: 1.78, // Added height
     photo: "https://images.unsplash.com/photo-1568602471122-7832951cc4c5?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     progress: [
       { date: "2023-09-15", weight: 85, bodyFat: 22 },
@@ -129,6 +130,7 @@ const sampleClients: Client[] = [
     age: 28,
     goal: "Definición",
     startDate: "2023-10-01",
+    height: 1.65, // Added height
     photo: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     progress: [
       { date: "2023-10-01", weight: 65, bodyFat: 24 },
@@ -144,6 +146,7 @@ const sampleClients: Client[] = [
     age: 42,
     goal: "Fuerza",
     startDate: "2023-08-15",
+    height: 1.82, // Added height
     photo: "https://images.unsplash.com/photo-1504257432389-52343af06ae3?q=80&w=2187&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     progress: [
       { date: "2023-08-15", weight: 90, bodyFat: 25 },

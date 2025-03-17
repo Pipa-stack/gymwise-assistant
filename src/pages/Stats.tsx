@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useAppContext } from "@/context/AppContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -30,13 +29,10 @@ const Stats = () => {
     notes: ""
   });
 
-  // Get active client data
   const clientData = clients.find(client => client.id === activeClient);
 
-  // Prepare progress data for charts
   const progressData = clientData?.progress || [];
   
-  // Calculate additional statistics
   const goalsByDistribution = clients.reduce((acc, client) => {
     acc[client.goal] = (acc[client.goal] || 0) + 1;
     return acc;
@@ -47,7 +43,6 @@ const Stats = () => {
     value: goalsByDistribution[goal]
   }));
   
-  // Generar datos de actividad (sesiones por día en la última semana)
   const activityData = Array.from({ length: 7 }, (_, i) => {
     const date = subDays(new Date(), i);
     const sessionCount = sessions.filter(session => 
@@ -61,7 +56,6 @@ const Stats = () => {
     };
   }).reverse();
 
-  // Client progress over time
   const progressDataFormatted = progressData.map(item => ({
     date: new Date(item.date).toLocaleDateString('es-ES', { day: '2-digit', month: 'short' }),
     weight: item.weight,
@@ -69,7 +63,6 @@ const Stats = () => {
     musclePercentage: item.musclePercentage || 0
   }));
 
-  // Función para calcular tendencias
   const calculateTrend = (metric: keyof Progress) => {
     if (progressData.length < 2) return { value: 0, isPositive: true };
     
@@ -82,7 +75,6 @@ const Stats = () => {
     
     const percentChange = ((currentValue - previousValue) / previousValue) * 100;
     
-    // Para peso y grasa corporal, una reducción es positiva
     let isPositive = metric === 'musclePercentage' ? percentChange > 0 : percentChange < 0;
     
     return {
@@ -91,7 +83,6 @@ const Stats = () => {
     };
   };
 
-  // Análisis de frecuencia de entrenamiento
   const completedSessions = sessions.filter(session => 
     (clientData && session.clientId === clientData.id) && 
     session.status === "completed"
@@ -212,14 +203,14 @@ const Stats = () => {
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-semibold">
-              {progressData.length > 0 && clientData ? 
-                (progressData[progressData.length - 1].weight / Math.pow(clientData.height || 1.75, 2)).toFixed(1) : 
+              {progressData.length > 0 && clientData && clientData.height ? 
+                (progressData[progressData.length - 1].weight / Math.pow(clientData.height, 2)).toFixed(1) : 
                 "N/A"}
             </div>
             <div className="text-xs text-muted-foreground mt-1">
-              {progressData.length > 0 && clientData ? 
+              {progressData.length > 0 && clientData && clientData.height ? 
                 (() => {
-                  const bmi = progressData[progressData.length - 1].weight / Math.pow(clientData.height || 1.75, 2);
+                  const bmi = progressData[progressData.length - 1].weight / Math.pow(clientData.height, 2);
                   if (bmi < 18.5) return "Bajo peso";
                   if (bmi < 25) return "Peso normal";
                   if (bmi < 30) return "Sobrepeso";
