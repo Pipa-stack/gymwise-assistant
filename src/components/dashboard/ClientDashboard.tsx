@@ -3,6 +3,7 @@ import { Client, ScheduledSession } from "@/context/AppContext";
 import { ClientStatsCards } from "./StatsCards";
 import ClientSessions from "./ClientSessions";
 import ClientProgress from "./ClientProgress";
+import DocumentViewer from "./DocumentViewer";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
@@ -16,6 +17,36 @@ const ClientDashboard = ({ client, clientSessions }: ClientDashboardProps) => {
   const trainingDays = Math.ceil(
     Math.abs(new Date().getTime() - new Date(client.startDate).getTime()) / (1000 * 60 * 60 * 24)
   );
+  
+  // Datos de ejemplo para documentos
+  const sampleDocuments = [
+    {
+      id: "doc1",
+      title: "The Essentials Program 2x.pdf",
+      fileSize: "43 MB",
+      fileType: "Documento Adobe Acrobat",
+      pdfUrl: "/sample-pdf.pdf",
+      createdAt: new Date().toISOString(),
+      exercises: [
+        { name: "Mira por ejemplo", videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ" },
+        { name: "Este chico se dedica a vender PDFs", videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ" },
+        { name: "Con rutinas", videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ" },
+        { name: "Y en cada ejercicio tiene un hipervínculo con la demostración del ejercicio", videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ" }
+      ]
+    },
+    {
+      id: "doc2",
+      title: "Plan de Entrenamiento - Semana 1.pdf",
+      fileSize: "2.5 MB",
+      fileType: "Documento Adobe Acrobat",
+      pdfUrl: "/sample-pdf.pdf",
+      createdAt: new Date().toISOString(),
+      exercises: [
+        { name: "Flat DB Press", videoUrl: "https://youtu.be/URQ1Wn7lYA?feature=shared" },
+        { name: "Squat", videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ" }
+      ]
+    }
+  ];
   
   return (
     <div className="space-y-8 animate-fade-in">
@@ -37,6 +68,10 @@ const ClientDashboard = ({ client, clientSessions }: ClientDashboardProps) => {
       <div className="grid gap-6 md:grid-cols-12">
         <ClientSessions sessions={clientSessions} />
         <ClientProgress progress={client.progress || []} />
+      </div>
+      
+      <div className="grid gap-6 md:grid-cols-12">
+        <DocumentViewer documents={sampleDocuments} />
       </div>
     </div>
   );

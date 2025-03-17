@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { toast } from "@/hooks/use-toast";
+import { PdfDocumentProps } from "@/components/dashboard/PdfDocument";
 
 // Types for our data models
 export type UserMode = "trainer" | "client";
@@ -15,6 +16,7 @@ export interface Client {
   height?: number; // Added height property as optional
   photo?: string;
   progress?: Progress[];
+  documents?: PdfDocumentProps[]; // Añadimos los documentos al cliente
 }
 
 export interface Progress {
@@ -120,7 +122,8 @@ const sampleClients: Client[] = [
       { date: "2023-09-15", weight: 85, bodyFat: 22 },
       { date: "2023-10-15", weight: 83, bodyFat: 20 },
       { date: "2023-11-15", weight: 81, bodyFat: 18 },
-    ]
+    ],
+    documents: []
   },
   {
     id: "c2",
@@ -136,7 +139,8 @@ const sampleClients: Client[] = [
       { date: "2023-10-01", weight: 65, bodyFat: 24 },
       { date: "2023-11-01", weight: 64, bodyFat: 22 },
       { date: "2023-12-01", weight: 63, bodyFat: 21 },
-    ]
+    ],
+    documents: []
   },
   {
     id: "c3",
@@ -152,7 +156,8 @@ const sampleClients: Client[] = [
       { date: "2023-08-15", weight: 90, bodyFat: 25 },
       { date: "2023-09-15", weight: 88, bodyFat: 24 },
       { date: "2023-10-15", weight: 87, bodyFat: 23 },
-    ]
+    ],
+    documents: []
   }
 ];
 
