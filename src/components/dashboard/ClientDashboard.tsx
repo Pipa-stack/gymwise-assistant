@@ -22,11 +22,12 @@ const ClientDashboard = ({ client, clientSessions }: ClientDashboardProps) => {
   const sampleDocuments = [
     {
       id: "doc1",
-      title: "The Essentials Program 2x.pdf",
+      title: "Plan Essentials Program 2x.pdf",
       fileSize: "43 MB",
       fileType: "Documento Adobe Acrobat",
       pdfUrl: "/sample-pdf.pdf",
       createdAt: new Date().toISOString(),
+      category: "Plan",
       exercises: [
         { name: "Mira por ejemplo", videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ" },
         { name: "Este chico se dedica a vender PDFs", videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ" },
@@ -41,10 +42,45 @@ const ClientDashboard = ({ client, clientSessions }: ClientDashboardProps) => {
       fileType: "Documento Adobe Acrobat",
       pdfUrl: "/sample-pdf.pdf",
       createdAt: new Date().toISOString(),
+      category: "Plan",
       exercises: [
         { name: "Flat DB Press", videoUrl: "https://youtu.be/URQ1Wn7lYA?feature=shared" },
         { name: "Squat", videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ" }
       ]
+    },
+    {
+      id: "doc3",
+      title: "Guía Nutrición Básica.pdf",
+      fileSize: "1.8 MB",
+      fileType: "Documento Adobe Acrobat",
+      pdfUrl: "/sample-pdf.pdf",
+      createdAt: new Date().toISOString(),
+      category: "Guía",
+      exercises: []
+    },
+    {
+      id: "doc4",
+      title: "Rutina Hipertrofia Avanzada.pdf",
+      fileSize: "5.2 MB",
+      fileType: "Documento Adobe Acrobat",
+      pdfUrl: "/sample-pdf.pdf",
+      createdAt: new Date().toISOString(),
+      category: "Rutina",
+      exercises: [
+        { name: "Deadlift", videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ" },
+        { name: "Bench Press", videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ" },
+        { name: "Pull-up", videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ" }
+      ]
+    },
+    {
+      id: "doc5",
+      title: "Informe Progreso Mensual.pdf",
+      fileSize: "0.8 MB",
+      fileType: "Documento Adobe Acrobat",
+      pdfUrl: "/sample-pdf.pdf",
+      createdAt: new Date().toISOString(),
+      category: "Informe",
+      exercises: []
     }
   ];
   

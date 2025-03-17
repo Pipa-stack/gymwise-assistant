@@ -1,6 +1,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { FileText, Youtube, ExternalLink, Download, Eye } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
@@ -18,6 +19,7 @@ export interface PdfDocumentProps {
   pdfUrl: string;
   exercises?: DocumentExercise[];
   createdAt: string;
+  category?: string;
 }
 
 const PdfDocument = ({ 
@@ -27,7 +29,8 @@ const PdfDocument = ({
   thumbnailUrl, 
   pdfUrl, 
   exercises,
-  createdAt 
+  createdAt,
+  category
 }: PdfDocumentProps) => {
   const [showVideo, setShowVideo] = useState(false);
   const [selectedExercise, setSelectedExercise] = useState<DocumentExercise | null>(null);
@@ -43,6 +46,19 @@ const PdfDocument = ({
   const handleOpenVideo = (exercise: DocumentExercise) => {
     setSelectedExercise(exercise);
     setShowVideo(true);
+  };
+
+  // Determinar el color del badge según la categoría
+  const getBadgeVariant = () => {
+    if (!category) return "outline";
+    
+    switch(category.toLowerCase()) {
+      case "plan": return "default";
+      case "guía": case "guia": return "secondary";
+      case "rutina": return "destructive";
+      case "informe": return "outline";
+      default: return "outline";
+    }
   };
 
   return (
@@ -63,7 +79,14 @@ const PdfDocument = ({
         </div>
         
         <div className="flex-grow">
-          <h3 className="font-medium text-base">{title}</h3>
+          <div className="flex items-center gap-2 mb-1">
+            <h3 className="font-medium text-base">{title}</h3>
+            {category && (
+              <Badge variant={getBadgeVariant()}>
+                {category}
+              </Badge>
+            )}
+          </div>
           <p className="text-sm text-muted-foreground">{fileSize}, {fileType}</p>
           <div className="flex mt-2 space-x-2">
             <Button size="sm" variant="outline" asChild>
