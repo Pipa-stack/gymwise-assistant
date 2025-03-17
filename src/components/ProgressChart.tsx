@@ -9,6 +9,7 @@ import {
   Tooltip,
   ResponsiveContainer,
   Legend,
+  ReferenceLine,
 } from "recharts";
 import { Progress } from "@/context/AppContext";
 
@@ -40,32 +41,47 @@ const ProgressChart = ({ data, metrics, height = 300 }: ProgressChartProps) => {
     bodyFat: "% Grasa",
     musclePercentage: "% Músculo",
   };
+  
+  // Calculate averages for reference lines
+  const averages = useMemo(() => {
+    const result: Record<string, number> = {};
+    
+    if (data.length === 0) return result;
+    
+    metrics.forEach(metric => {
+      if (data[0][metric] !== undefined) {
+        const sum = data.reduce((acc, entry) => acc + (Number(entry[metric]) || 0), 0);
+        result[metric] = sum / data.length;
+      }
+    });
+    
+    return result;
+  }, [data, metrics]);
 
   return (
-    <div className="w-full rounded-lg border bg-card p-4 shadow-sm">
-      <h3 className="mb-4 text-lg font-medium">Progreso</h3>
+    <div className="w-full rounded-lg border border-border/60 bg-card p-4 shadow-sm">
       <div className="h-[300px]">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart
             data={chartData}
             margin={{
-              top: 5,
+              top: 10,
               right: 30,
-              left: 20,
-              bottom: 5,
+              left: 15,
+              bottom: 10,
             }}
           >
-            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
             <XAxis
               dataKey="date"
               tick={{ fontSize: 12 }}
-              tickLine={{ stroke: "#e5e7eb" }}
-              axisLine={{ stroke: "#e5e7eb" }}
+              tickLine={{ stroke: "hsl(var(--border))" }}
+              axisLine={{ stroke: "hsl(var(--border))" }}
             />
             <YAxis
               tick={{ fontSize: 12 }}
-              tickLine={{ stroke: "#e5e7eb" }}
-              axisLine={{ stroke: "#e5e7eb" }}
+              tickLine={{ stroke: "hsl(var(--border))" }}
+              axisLine={{ stroke: "hsl(var(--border))" }}
             />
             <Tooltip
               contentStyle={{
@@ -76,18 +92,43 @@ const ProgressChart = ({ data, metrics, height = 300 }: ProgressChartProps) => {
               }}
               labelStyle={{ fontWeight: "bold", marginBottom: "0.5rem" }}
             />
-            <Legend />
+            <Legend 
+              verticalAlign="top" 
+              height={36} 
+              formatter={(value, entry) => (
+                <span style={{ color: "hsl(var(--foreground))", marginLeft: "8px" }}>{value}</span>
+              )}
+            />
+            
             {metrics.map((metric) => (
               data[0][metric] !== undefined && (
-                <Line
-                  key={metric}
-                  type="monotone"
-                  dataKey={metric}
-                  name={labels[metric]}
-                  stroke={colors[metric]}
-                  activeDot={{ r: 6 }}
-                  strokeWidth={2}
-                />
+                <>
+                  <Line
+                    key={metric}
+                    type="monotone"
+                    dataKey={metric}
+                    name={labels[metric]}
+                    stroke={colors[metric]}
+                    activeDot={{ r: 8, strokeWidth: 1, stroke: "hsl(var(--background))" }}
+                    strokeWidth={2}
+                    dot={{ r: 4, strokeWidth: 1, stroke: "hsl(var(--background))" }}
+                    animationDuration={1500}
+                  />
+                  {averages[metric] && (
+                    <ReferenceLine 
+                      y={averages[metric]} 
+                      stroke={colors[metric]} 
+                      strokeDasharray="3 3" 
+                      strokeOpacity={0.6} 
+                      label={{
+                        value: `Prom: ${averages[metric].toFixed(1)}`,
+                        fill: colors[metric],
+                        fontSize: 10,
+                        position: 'right'
+                      }}
+                    />
+                  )}
+                </>
               )
             ))}
           </LineChart>

@@ -2,10 +2,10 @@
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CalendarClock, Clock, ChevronRight, Calendar } from "lucide-react";
+import { CalendarClock, Clock, ChevronRight, Calendar, Users } from "lucide-react";
 import { Client, ScheduledSession } from "@/context/AppContext";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { format } from "date-fns";
+import { format, isToday } from "date-fns";
 import { es } from "date-fns/locale";
 
 interface TodaySessionsProps {
@@ -23,6 +23,23 @@ const TodaySessions = ({ sessions, clients }: TodaySessionsProps) => {
       .map(part => part[0])
       .join('')
       .toUpperCase();
+  };
+
+  // Format time to show "En 30 min" if it's within the hour
+  const getFormattedTimeStatus = (sessionTime: string) => {
+    const [hours, minutes] = sessionTime.split(':').map(Number);
+    const sessionDate = new Date();
+    sessionDate.setHours(hours, minutes, 0);
+    
+    const now = new Date();
+    const diffMs = sessionDate.getTime() - now.getTime();
+    const diffMins = Math.round(diffMs / 60000);
+    
+    if (diffMins > 0 && diffMins < 60) {
+      return `En ${diffMins} min`;
+    }
+    
+    return sessionTime;
   };
   
   return (
@@ -44,7 +61,7 @@ const TodaySessions = ({ sessions, clients }: TodaySessionsProps) => {
           Ver Todas
         </Button>
       </CardHeader>
-      <CardContent className="p-4">
+      <CardContent className="p-4 max-h-[450px] overflow-auto">
         {sessions.length > 0 ? (
           <div className="space-y-3">
             {sessions.map(session => {
@@ -53,15 +70,19 @@ const TodaySessions = ({ sessions, clients }: TodaySessionsProps) => {
               // Format the date for display
               const sessionDate = new Date(session.date);
               const formattedDate = format(sessionDate, "EEEE, dd 'de' MMMM", { locale: es });
+              const isUpcoming = isToday(sessionDate);
               
               return (
                 <div 
                   key={session.id} 
-                  className="flex justify-between items-center p-3 border rounded-lg hover:bg-accent/30 transition-all duration-300 group"
+                  className="flex justify-between items-center p-3 border rounded-lg hover:bg-accent/30 transition-all duration-300 group relative overflow-hidden"
                 >
+                  {isUpcoming && (
+                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary animate-pulse"></div>
+                  )}
                   <div className="flex items-center gap-3">
-                    <Avatar className="h-10 w-10 border-2 border-primary/20">
-                      <AvatarFallback className="bg-primary/10 text-primary">
+                    <Avatar className="h-10 w-10 border-2 border-primary/20 shadow-sm">
+                      <AvatarFallback className="bg-primary/10 text-primary font-medium">
                         {client && getInitials(client.name)}
                       </AvatarFallback>
                     </Avatar>
@@ -69,7 +90,9 @@ const TodaySessions = ({ sessions, clients }: TodaySessionsProps) => {
                       <p className="font-medium group-hover:text-primary transition-colors">{client?.name}</p>
                       <div className="flex items-center text-sm text-muted-foreground gap-1">
                         <Clock className="h-3 w-3" />
-                        {session.startTime} - {session.endTime}
+                        <span className={isUpcoming ? "font-medium text-primary" : ""}>
+                          {isUpcoming ? getFormattedTimeStatus(session.startTime) : session.startTime} - {session.endTime}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -103,6 +126,18 @@ const TodaySessions = ({ sessions, clients }: TodaySessionsProps) => {
                 Programar Nueva Sesión
               </Button>
             </div>
+          </div>
+        )}
+        
+        {sessions.length > 0 && (
+          <div className="mt-4 pt-3 border-t flex justify-between items-center">
+            <div className="flex items-center text-sm text-muted-foreground">
+              <Users className="h-4 w-4 mr-1" />
+              <span>Clientes totales: {clients.length}</span>
+            </div>
+            <Button variant="ghost" size="sm" onClick={() => navigate("/clients")} className="text-xs">
+              Ver todos los clientes
+            </Button>
           </div>
         )}
       </CardContent>
