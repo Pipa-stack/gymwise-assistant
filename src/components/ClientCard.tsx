@@ -9,9 +9,10 @@ import { Calendar, MessageSquare, ClipboardList } from "lucide-react";
 
 interface ClientCardProps {
   client: Client;
+  onClick?: () => void;
 }
 
-const ClientCard = ({ client }: ClientCardProps) => {
+const ClientCard = ({ client, onClick }: ClientCardProps) => {
   const navigate = useNavigate();
   
   const lastProgress = client.progress && client.progress.length > 0 
@@ -59,7 +60,7 @@ const ClientCard = ({ client }: ClientCardProps) => {
       </CardContent>
       
       <CardFooter className="flex justify-between gap-2 p-6 pt-0">
-        <Button variant="outline" size="sm" className="flex-1">
+        <Button variant="outline" size="sm" className="flex-1" onClick={onClick}>
           <Calendar className="h-4 w-4 mr-1" />
           Reservar
         </Button>
