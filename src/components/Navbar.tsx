@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAppContext } from "@/context/AppContext";
@@ -12,7 +13,8 @@ import {
   User,
   LineChart,
   Apple,
-  Activity 
+  Activity,
+  Flame 
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -71,10 +73,10 @@ const Navbar = () => {
         <div className="flex items-center space-x-2">
           <Link to="/" className="flex items-center space-x-2">
             <div className="relative h-8 w-8 overflow-hidden rounded-full bg-primary text-primary-foreground">
-              <Dumbbell className="absolute inset-0 m-auto h-5 w-5" />
+              <Flame className="absolute inset-0 m-auto h-5 w-5" />
             </div>
             <span className="hidden text-xl font-bold sm:inline-block">
-              GymWise
+              FitCoach Pro
             </span>
             <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
               {mode === "trainer" ? "Entrenador" : "Cliente"}
