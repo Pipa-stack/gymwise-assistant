@@ -1,5 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
+import { toast } from "@/hooks/use-toast";
 
 // Types for our data models
 export type UserMode = "trainer" | "client";
@@ -73,6 +74,14 @@ export interface ScheduledSession {
   trainingPlanId?: string;
 }
 
+export interface AvailableSlot {
+  id: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+  isTaken: boolean;
+}
+
 interface AppContextProps {
   mode: UserMode;
   setMode: (mode: UserMode) => void;
@@ -84,8 +93,13 @@ interface AppContextProps {
   setTrainingPlans: React.Dispatch<React.SetStateAction<TrainingPlan[]>>;
   sessions: ScheduledSession[];
   setSessions: React.Dispatch<React.SetStateAction<ScheduledSession[]>>;
+  availableSlots: AvailableSlot[];
+  setAvailableSlots: React.Dispatch<React.SetStateAction<AvailableSlot[]>>;
   loading: boolean;
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  bookSession: (clientId: string, slotId: string) => void;
+  cancelSession: (sessionId: string) => void;
+  getExerciseById: (id: string) => Exercise | undefined;
 }
 
 const AppContext = createContext<AppContextProps | undefined>(undefined);
@@ -257,12 +271,52 @@ const sampleSessions: ScheduledSession[] = [
   }
 ];
 
+// Generar slots disponibles para las próximas 2 semanas
+const generateAvailableSlots = (): AvailableSlot[] => {
+  const slots: AvailableSlot[] = [];
+  const now = new Date();
+  
+  // Generar slots para los próximos 14 días
+  for (let i = 0; i < 14; i++) {
+    const date = new Date(now);
+    date.setDate(now.getDate() + i);
+    
+    // Solo días laborables (de lunes a viernes)
+    if (date.getDay() !== 0 && date.getDay() !== 6) {
+      // Slots de mañana (9:00 - 13:00)
+      for (let hour = 9; hour < 13; hour++) {
+        slots.push({
+          id: `slot-${date.toISOString().split('T')[0]}-${hour}`,
+          date: date.toISOString().split('T')[0],
+          startTime: `${hour}:00`,
+          endTime: `${hour + 1}:00`,
+          isTaken: Math.random() > 0.7 // 30% de probabilidad de que esté ocupado
+        });
+      }
+      
+      // Slots de tarde (16:00 - 20:00)
+      for (let hour = 16; hour < 20; hour++) {
+        slots.push({
+          id: `slot-${date.toISOString().split('T')[0]}-${hour}`,
+          date: date.toISOString().split('T')[0],
+          startTime: `${hour}:00`,
+          endTime: `${hour + 1}:00`,
+          isTaken: Math.random() > 0.7 // 30% de probabilidad de que esté ocupado
+        });
+      }
+    }
+  }
+  
+  return slots;
+};
+
 export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [mode, setMode] = useState<UserMode>("trainer");
   const [clients, setClients] = useState<Client[]>(sampleClients);
   const [exercises, setExercises] = useState<Exercise[]>(sampleExercises);
   const [trainingPlans, setTrainingPlans] = useState<TrainingPlan[]>(sampleTrainingPlans);
   const [sessions, setSessions] = useState<ScheduledSession[]>(sampleSessions);
+  const [availableSlots, setAvailableSlots] = useState<AvailableSlot[]>(generateAvailableSlots());
   const [loading, setLoading] = useState<boolean>(true);
 
   // Simulate data loading
@@ -273,6 +327,87 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     
     return () => clearTimeout(timer);
   }, []);
+
+  // Función para reservar una sesión
+  const bookSession = (clientId: string, slotId: string) => {
+    const slot = availableSlots.find(s => s.id === slotId);
+    
+    if (!slot) {
+      toast({
+        title: "Error",
+        description: "El horario seleccionado no está disponible",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (slot.isTaken) {
+      toast({
+        title: "Error",
+        description: "Este horario ya está ocupado",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Crear nueva sesión
+    const newSession: ScheduledSession = {
+      id: `session-${Date.now()}`,
+      clientId,
+      date: slot.date,
+      startTime: slot.startTime,
+      endTime: slot.endTime,
+      status: "scheduled"
+    };
+    
+    // Actualizar sesiones
+    setSessions(prev => [...prev, newSession]);
+    
+    // Marcar slot como ocupado
+    setAvailableSlots(prev => 
+      prev.map(s => s.id === slotId ? {...s, isTaken: true} : s)
+    );
+    
+    toast({
+      title: "Reserva confirmada",
+      description: `Sesión reservada para el ${new Date(slot.date).toLocaleDateString('es-ES')} a las ${slot.startTime}`
+    });
+  };
+
+  // Función para cancelar una sesión
+  const cancelSession = (sessionId: string) => {
+    const session = sessions.find(s => s.id === sessionId);
+    
+    if (!session) {
+      toast({
+        title: "Error",
+        description: "No se encontró la sesión",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Actualizar estado de la sesión
+    setSessions(prev => 
+      prev.map(s => s.id === sessionId ? {...s, status: "cancelled"} : s)
+    );
+    
+    // Liberar el slot
+    const slotId = `slot-${session.date}-${parseInt(session.startTime.split(':')[0])}`;
+    setAvailableSlots(prev => 
+      prev.map(s => s.id === slotId ? {...s, isTaken: false} : s)
+    );
+    
+    toast({
+      title: "Sesión cancelada",
+      description: `La sesión del ${new Date(session.date).toLocaleDateString('es-ES')} a las ${session.startTime} ha sido cancelada`
+    });
+  };
+
+  // Función para obtener un ejercicio por su ID
+  const getExerciseById = (id: string) => {
+    return exercises.find(exercise => exercise.id === id);
+  };
 
   const value = {
     mode,
@@ -285,8 +420,13 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     setTrainingPlans,
     sessions,
     setSessions,
+    availableSlots,
+    setAvailableSlots,
     loading,
-    setLoading
+    setLoading,
+    bookSession,
+    cancelSession,
+    getExerciseById
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

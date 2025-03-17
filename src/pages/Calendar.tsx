@@ -1,142 +1,152 @@
 
-import { Calendar as CalendarUI } from "@/components/ui/calendar";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState } from "react";
-import { addDays } from "date-fns";
-import { Badge } from "@/components/ui/badge";
-import { CalendarIcon, Users } from "lucide-react";
-
-const appointments = [
-  {
-    id: 1,
-    client: "Carlos Ruiz",
-    date: addDays(new Date(), 1),
-    time: "09:00 - 10:00",
-    type: "Personal Training"
-  },
-  {
-    id: 2,
-    client: "Laura Méndez",
-    date: addDays(new Date(), 2),
-    time: "15:30 - 16:30",
-    type: "Assessment"
-  },
-  {
-    id: 3,
-    client: "Sergio González",
-    date: addDays(new Date(), 3),
-    time: "18:00 - 19:00",
-    type: "Personal Training"
-  },
-  {
-    id: 4,
-    client: "María Jiménez",
-    date: new Date(),
-    time: "11:00 - 12:00",
-    type: "Personal Training"
-  },
-];
+import { useAppContext } from "@/context/AppContext";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { CalendarCheck, CalendarClock, CalendarDays, Calendar as CalendarIcon } from "lucide-react";
+import { format, isSameDay } from "date-fns";
+import BookingCalendar from "@/components/BookingCalendar";
 
 const Calendar = () => {
-  const [date, setDate] = useState<Date | undefined>(new Date());
-  const [view, setView] = useState<string>("day");
-
-  // Filter appointments for the selected date
-  const filteredAppointments = appointments.filter(
-    appointment => 
-      date && 
-      appointment.date.getDate() === date.getDate() &&
-      appointment.date.getMonth() === date.getMonth() &&
-      appointment.date.getFullYear() === date.getFullYear()
+  const { mode, clients, sessions } = useAppContext();
+  const [selectedClient, setSelectedClient] = useState<string | undefined>(
+    mode === "client" ? clients[0]?.id : undefined
   );
+  
+  // Sesiones próximas (futuras)
+  const upcomingSessions = sessions.filter(
+    session => new Date(session.date) >= new Date() && session.status === "scheduled"
+  ).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+  // Sesiones para hoy
+  const todaySessions = sessions.filter(
+    session => isSameDay(new Date(session.date), new Date()) && session.status === "scheduled"
+  ).sort((a, b) => a.startTime.localeCompare(b.startTime));
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <h1 className="text-3xl font-bold tracking-tight">Calendario</h1>
-        <Select value={view} onValueChange={setView}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Seleccionar vista" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="day">Vista diaria</SelectItem>
-            <SelectItem value="week">Vista semanal</SelectItem>
-            <SelectItem value="month">Vista mensual</SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" className="gap-1">
+            <CalendarIcon className="h-4 w-4" />
+            <span>Hoy</span>
+          </Button>
+          <Button className="gap-1">
+            <CalendarClock className="h-4 w-4" />
+            <span>Reservar</span>
+          </Button>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="md:col-span-1">
-          <CardHeader>
-            <CardTitle>Calendario</CardTitle>
-            <CardDescription>Selecciona una fecha para ver tus citas</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <CalendarUI
-              mode="single"
-              selected={date}
-              onSelect={setDate}
-              className="rounded-md border"
-            />
-          </CardContent>
-        </Card>
+      <Tabs defaultValue="bookings" className="space-y-6">
+        <TabsList>
+          <TabsTrigger value="bookings" className="flex items-center gap-1.5">
+            <CalendarClock className="h-4 w-4" />
+            <span>Reservas</span>
+          </TabsTrigger>
+          <TabsTrigger value="schedule" className="flex items-center gap-1.5">
+            <CalendarDays className="h-4 w-4" />
+            <span>Horario</span>
+          </TabsTrigger>
+        </TabsList>
 
-        <Card className="md:col-span-2">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <div>
-              <CardTitle>Citas</CardTitle>
-              <CardDescription>
-                {date ? (
-                  <>
-                    {date.toLocaleDateString("es-ES", {
-                      weekday: "long",
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
+        <TabsContent value="bookings" className="space-y-6">
+          <BookingCalendar clientId={mode === "client" ? clients[0]?.id : selectedClient} />
+        </TabsContent>
+
+        <TabsContent value="schedule" className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <CalendarCheck className="h-5 w-5 text-primary" />
+                    Hoy
+                  </CardTitle>
+                  <span className="text-sm text-muted-foreground">
+                    {format(new Date(), "EEEE, dd 'de' MMMM")}
+                  </span>
+                </div>
+                <CardDescription>Sesiones programadas para hoy</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {todaySessions.length > 0 ? (
+                  <div className="space-y-3">
+                    {todaySessions.map(session => {
+                      const client = clients.find(c => c.id === session.clientId);
+                      return (
+                        <div key={session.id} className="p-3 border rounded-lg flex justify-between items-center">
+                          <div>
+                            <div className="font-medium">{client?.name}</div>
+                            <div className="text-sm text-muted-foreground">
+                              {session.startTime} - {session.endTime}
+                            </div>
+                          </div>
+                          <Button variant="outline" size="sm">Ver detalles</Button>
+                        </div>
+                      );
                     })}
-                  </>
-                ) : (
-                  "Selecciona una fecha"
-                )}
-              </CardDescription>
-            </div>
-            <Badge variant="outline" className="flex gap-1 items-center">
-              <CalendarIcon className="h-3.5 w-3.5" />
-              <span>{filteredAppointments.length} citas</span>
-            </Badge>
-          </CardHeader>
-          <CardContent>
-            {filteredAppointments.length > 0 ? (
-              <div className="space-y-4">
-                {filteredAppointments.map((appointment) => (
-                  <div 
-                    key={appointment.id}
-                    className="flex items-center justify-between p-4 rounded-lg border"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="bg-primary/10 p-2 rounded-full">
-                        <Users className="h-5 w-5 text-primary" />
-                      </div>
-                      <div>
-                        <div className="font-medium">{appointment.client}</div>
-                        <div className="text-sm text-muted-foreground">{appointment.time}</div>
-                      </div>
-                    </div>
-                    <Badge>{appointment.type}</Badge>
                   </div>
-                ))}
-              </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center h-40 text-center">
-                <CalendarIcon className="h-10 w-10 text-muted-foreground mb-2" />
-                <p className="text-muted-foreground">No hay citas programadas para esta fecha</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center h-40 text-center">
+                    <CalendarIcon className="h-10 w-10 text-muted-foreground mb-2" />
+                    <p className="text-muted-foreground">No hay sesiones programadas para hoy</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <CalendarClock className="h-5 w-5 text-primary" />
+                  Próximas Sesiones
+                </CardTitle>
+                <CardDescription>Sesiones programadas para los próximos días</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {upcomingSessions.length > 0 ? (
+                  <div className="space-y-3">
+                    {upcomingSessions.slice(0, 5).map(session => {
+                      const client = clients.find(c => c.id === session.clientId);
+                      const sessionDate = new Date(session.date);
+                      
+                      return (
+                        <div key={session.id} className="p-3 border rounded-lg flex justify-between items-center">
+                          <div>
+                            <div className="font-medium">{client?.name}</div>
+                            <div className="text-xs text-muted-foreground">
+                              {format(sessionDate, "EEEE, dd 'de' MMMM")}
+                            </div>
+                            <div className="text-sm">
+                              {session.startTime} - {session.endTime}
+                            </div>
+                          </div>
+                          <Button variant="outline" size="sm">Ver detalles</Button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center h-40 text-center">
+                    <CalendarClock className="h-10 w-10 text-muted-foreground mb-2" />
+                    <p className="text-muted-foreground">No hay sesiones programadas próximamente</p>
+                  </div>
+                )}
+              </CardContent>
+              {upcomingSessions.length > 5 && (
+                <CardFooter>
+                  <Button variant="ghost" className="w-full">
+                    Ver todas ({upcomingSessions.length})
+                  </Button>
+                </CardFooter>
+              )}
+            </Card>
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

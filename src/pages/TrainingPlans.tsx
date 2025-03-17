@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useAppContext } from "@/context/AppContext";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,8 +5,10 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Dumbbell, Search, PlusCircle, Calendar, List, Users, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import ExerciseViewer from "@/components/ExerciseViewer";
 
 const TrainingPlans = () => {
   const { mode, trainingPlans, clients } = useAppContext();
@@ -15,6 +16,7 @@ const TrainingPlans = () => {
   const [filteredPlans, setFilteredPlans] = useState(trainingPlans);
   const [activeTab, setActiveTab] = useState<string>("all");
   const [loaded, setLoaded] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
 
   useEffect(() => {
     // Filter training plans based on search query and active tab
@@ -41,27 +43,49 @@ const TrainingPlans = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  if (mode !== "trainer") {
+  // Obtener el plan seleccionado
+  const selectedPlanData = trainingPlans.find(plan => plan.id === selectedPlan);
+
+  // Pantalla para modo cliente
+  if (mode === "client") {
+    const clientPlans = trainingPlans.filter(
+      plan => plan.clientId === clients[0]?.id
+    );
+
     return (
-      <div className="flex h-[70vh] items-center justify-center">
-        <div className="text-center">
-          <Dumbbell className="mx-auto h-12 w-12 text-muted-foreground" />
-          <h2 className="mt-4 text-lg font-medium">Solo disponible en modo entrenador</h2>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Esta sección solo está disponible cuando te encuentras en modo entrenador.
+      <div className="space-y-6 animate-fade-in">
+        <div className="flex flex-col space-y-2">
+          <h2 className="text-3xl font-bold tracking-tight">Mi Plan de Entrenamiento</h2>
+          <p className="text-muted-foreground">
+            Consulta tu plan de entrenamiento personalizado
           </p>
         </div>
+
+        {clientPlans.length > 0 ? (
+          <div className="grid gap-6">
+            <ExerciseViewer clientId={clients[0]?.id} />
+          </div>
+        ) : (
+          <Card>
+            <CardHeader>
+              <CardTitle>Plan de Entrenamiento</CardTitle>
+              <CardDescription>No tienes ningún plan de entrenamiento asignado</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-col items-center justify-center py-8">
+                <Dumbbell className="h-12 w-12 text-muted-foreground opacity-40 mb-4" />
+                <p className="text-muted-foreground">
+                  Todavía no tienes un plan de entrenamiento asignado
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
     );
   }
 
-  // Helper function to get client name
-  const getClientName = (clientId: string | undefined) => {
-    if (!clientId) return "Sin asignar";
-    const client = clients.find(c => c.id === clientId);
-    return client ? client.name : "Cliente desconocido";
-  };
-
+  // Pantalla para modo entrenador
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex flex-col space-y-2">
@@ -139,12 +163,16 @@ const TrainingPlans = () => {
                   </div>
                   {plan.clientId && (
                     <div className="mt-3 text-sm font-medium">
-                      Cliente: {getClientName(plan.clientId)}
+                      Cliente: {clients.find(c => c.id === plan.clientId)?.name || "Desconocido"}
                     </div>
                   )}
                 </CardContent>
                 <CardFooter>
-                  <Button variant="ghost" className="w-full justify-between group-hover:bg-primary/5 transition-colors duration-300">
+                  <Button 
+                    variant="ghost" 
+                    className="w-full justify-between group-hover:bg-primary/5 transition-colors duration-300"
+                    onClick={() => setSelectedPlan(plan.id)}
+                  >
                     <span>Ver detalles</span>
                     <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform duration-300" />
                   </Button>
@@ -254,7 +282,7 @@ const TrainingPlans = () => {
                     </div>
                   </div>
                   <div className="mt-3 text-sm font-medium">
-                    Cliente: {getClientName(plan.clientId)}
+                    Cliente: {clients.find(c => c.id === plan.clientId)?.name || "Desconocido"}
                   </div>
                 </CardContent>
                 <CardFooter>
@@ -282,6 +310,20 @@ const TrainingPlans = () => {
           )}
         </TabsContent>
       </Tabs>
+
+      <Dialog
+        open={!!selectedPlan}
+        onOpenChange={(open) => {
+          if (!open) setSelectedPlan(null);
+        }}
+      >
+        <DialogContent className="sm:max-w-4xl sm:max-h-[90vh] overflow-auto">
+          <DialogHeader>
+            <DialogTitle>Detalles del Plan de Entrenamiento</DialogTitle>
+          </DialogHeader>
+          <ExerciseViewer planId={selectedPlan || undefined} />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

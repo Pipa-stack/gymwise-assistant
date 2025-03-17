@@ -5,12 +5,14 @@ import { useAppContext } from "@/context/AppContext";
 import DashboardCard from "@/components/DashboardCard";
 import ClientCard from "@/components/ClientCard";
 import ProgressChart from "@/components/ProgressChart";
-import { Calendar, Users, Dumbbell, Target, Clock, ArrowRight } from "lucide-react";
+import { Calendar, Users, Dumbbell, Target, Clock, ArrowRight, CalendarClock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { format, isToday } from "date-fns";
+import { es } from "date-fns/locale";
 
 const Index = () => {
-  const { mode, clients, trainingPlans, sessions } = useAppContext();
+  const { mode, clients, trainingPlans, sessions, exercises } = useAppContext();
   const navigate = useNavigate();
   const [recentLoaded, setRecentLoaded] = useState(false);
 
@@ -25,7 +27,7 @@ const Index = () => {
 
   // Filter sessions to only include upcoming ones
   const upcomingSessions = sessions.filter(
-    (session) => new Date(`${session.date}T${session.startTime}`) > new Date()
+    (session) => new Date(`${session.date}T${session.startTime}`) > new Date() && session.status === "scheduled"
   ).sort((a, b) => {
     return new Date(`${a.date}T${a.startTime}`).getTime() - new Date(`${b.date}T${b.startTime}`).getTime();
   });
@@ -36,6 +38,11 @@ const Index = () => {
   const nextSessionClient = nextSession 
     ? clients.find(client => client.id === nextSession.clientId) 
     : null;
+    
+  // Get today's sessions
+  const todaySessions = sessions.filter(
+    (session) => isToday(new Date(session.date)) && session.status === "scheduled"
+  );
   
   if (mode === "trainer") {
     return (
@@ -68,14 +75,14 @@ const Index = () => {
           />
           <DashboardCard
             title="Ejercicios"
-            value="35+"
+            value={exercises.length}
             icon={<Target className="h-6 w-6" />}
             className="animate-slide-in-up [animation-delay:400ms]"
           />
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          <Card className="md:col-span-1 animate-slide-in-up [animation-delay:500ms]">
+        <div className="grid gap-6 md:grid-cols-8 lg:grid-cols-12">
+          <Card className="md:col-span-3 lg:col-span-4 animate-slide-in-up [animation-delay:500ms]">
             <CardHeader>
               <CardTitle>Próxima Sesión</CardTitle>
               <CardDescription>Tu próxima sesión de entrenamiento</CardDescription>
@@ -90,11 +97,7 @@ const Index = () => {
                     <div>
                       <p className="font-medium">{nextSessionClient?.name}</p>
                       <p className="text-sm text-muted-foreground">
-                        {new Date(`${nextSession.date}T${nextSession.startTime}`).toLocaleDateString('es-ES', { 
-                          weekday: 'long', 
-                          day: 'numeric', 
-                          month: 'long' 
-                        })}
+                        {format(new Date(nextSession.date), "EEEE, dd 'de' MMMM", { locale: es })}
                       </p>
                       <p className="text-sm text-muted-foreground">
                         {nextSession.startTime} - {nextSession.endTime}
@@ -116,7 +119,60 @@ const Index = () => {
             </CardFooter>
           </Card>
 
-          <Card className="md:col-span-2 animate-slide-in-up [animation-delay:600ms]">
+          <Card className="md:col-span-5 lg:col-span-8 animate-slide-in-up [animation-delay:600ms]">
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle>Sesiones de Hoy</CardTitle>
+                <CardDescription>Sesiones programadas para hoy</CardDescription>
+              </div>
+              <Button variant="ghost" size="sm" onClick={() => navigate("/calendar")}>
+                Ver Todas
+              </Button>
+            </CardHeader>
+            <CardContent>
+              {todaySessions.length > 0 ? (
+                <div className="space-y-4">
+                  {todaySessions.map(session => {
+                    const client = clients.find(c => c.id === session.clientId);
+                    return (
+                      <div 
+                        key={session.id} 
+                        className="flex justify-between items-center p-3 border rounded-lg hover:bg-accent/50 transition-colors"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="rounded-full bg-primary/10 p-2 text-primary">
+                            <CalendarClock className="h-5 w-5" />
+                          </div>
+                          <div>
+                            <p className="font-medium">{client?.name}</p>
+                            <p className="text-sm text-muted-foreground">
+                              {session.startTime} - {session.endTime}
+                            </p>
+                          </div>
+                        </div>
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => navigate("/calendar")}
+                        >
+                          Detalles
+                        </Button>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="flex h-32 items-center justify-center">
+                  <div className="text-center">
+                    <CalendarClock className="mx-auto h-8 w-8 text-muted-foreground mb-2" />
+                    <p className="text-muted-foreground">No hay sesiones programadas para hoy</p>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card className="md:col-span-8 lg:col-span-12 animate-slide-in-up [animation-delay:700ms]">
             <CardHeader className="flex flex-row items-center justify-between">
               <div>
                 <CardTitle>Clientes Recientes</CardTitle>
@@ -144,6 +200,14 @@ const Index = () => {
   } else {
     // Client mode dashboard
     const clientData = clients[0]; // Using first client as example
+    const clientSessions = sessions.filter(session => 
+      session.clientId === clientData.id && 
+      session.status === "scheduled" && 
+      new Date(`${session.date}T${session.startTime}`) > new Date()
+    ).sort((a, b) => 
+      new Date(`${a.date}T${a.startTime}`).getTime() - new Date(`${b.date}T${b.startTime}`).getTime()
+    );
+    const nextClientSession = clientSessions[0];
     
     return (
       <div className="space-y-8 animate-fade-in">
@@ -157,10 +221,10 @@ const Index = () => {
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <DashboardCard
             title="Próxima Sesión"
-            value={upcomingSessions.length > 0 ? 
-              new Date(`${upcomingSessions[0].date}T${upcomingSessions[0].startTime}`).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })
+            value={nextClientSession ? 
+              format(new Date(nextClientSession.date), "dd 'de' MMM", { locale: es })
               : "Sin programar"}
-            description={upcomingSessions.length > 0 ? `${upcomingSessions[0].startTime} - ${upcomingSessions[0].endTime}` : ""}
+            description={nextClientSession ? `${nextClientSession.startTime} - ${nextClientSession.endTime}` : ""}
             icon={<Calendar className="h-6 w-6" />}
             className="animate-slide-in-up [animation-delay:100ms]"
           />
@@ -178,8 +242,63 @@ const Index = () => {
           />
         </div>
 
-        <div className="grid gap-6 md:grid-cols-8 lg:grid-cols-12">
-          <Card className="md:col-span-8 lg:col-span-12 animate-slide-in-up [animation-delay:400ms]">
+        <div className="grid gap-6 md:grid-cols-12">
+          <Card className="md:col-span-4 animate-slide-in-up [animation-delay:400ms]">
+            <CardHeader>
+              <CardTitle>Próximas Sesiones</CardTitle>
+              <CardDescription>Tus próximas sesiones de entrenamiento</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {clientSessions.length > 0 ? (
+                <div className="space-y-3">
+                  {clientSessions.slice(0, 3).map(session => (
+                    <div 
+                      key={session.id} 
+                      className="p-3 border rounded-lg hover:bg-accent/50 transition-colors cursor-pointer"
+                      onClick={() => navigate("/calendar")}
+                    >
+                      <div className="flex items-center gap-2 mb-1">
+                        <CalendarClock className="h-4 w-4 text-primary" />
+                        <p className="font-medium text-sm">
+                          {format(new Date(session.date), "EEEE, dd 'de' MMMM", { locale: es })}
+                        </p>
+                      </div>
+                      <div className="ml-6 text-sm text-muted-foreground">
+                        {session.startTime} - {session.endTime}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex h-32 items-center justify-center">
+                  <div className="text-center">
+                    <CalendarClock className="mx-auto h-8 w-8 text-muted-foreground mb-2" />
+                    <p className="text-muted-foreground">No tienes sesiones programadas</p>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="mt-3"
+                      onClick={() => navigate("/calendar")}
+                    >
+                      Reservar Ahora
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+            <CardFooter>
+              <Button 
+                variant="ghost" 
+                className="w-full"
+                onClick={() => navigate("/calendar")}
+              >
+                <span>Gestionar Reservas</span>
+                <ArrowRight className="ml-1 h-4 w-4" />
+              </Button>
+            </CardFooter>
+          </Card>
+
+          <Card className="md:col-span-8 animate-slide-in-up [animation-delay:500ms]">
             <CardHeader>
               <CardTitle>Mi Progreso</CardTitle>
               <CardDescription>Seguimiento de peso y composición corporal</CardDescription>
@@ -196,6 +315,16 @@ const Index = () => {
                 </div>
               )}
             </CardContent>
+            <CardFooter>
+              <Button 
+                variant="ghost" 
+                className="w-full"
+                onClick={() => navigate("/stats")}
+              >
+                <span>Ver Estadísticas Detalladas</span>
+                <ArrowRight className="ml-1 h-4 w-4" />
+              </Button>
+            </CardFooter>
           </Card>
         </div>
       </div>
