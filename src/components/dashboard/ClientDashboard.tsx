@@ -23,10 +23,10 @@ const ClientDashboard = ({ client, clientSessions }: ClientDashboardProps) => {
     {
       id: "doc1",
       title: "Plan Essentials Program 2x.pdf",
-      fileSize: "43 MB",
+      fileSize: "4.3 MB",
       fileType: "Documento Adobe Acrobat",
       pdfUrl: "/sample-pdf.pdf",
-      createdAt: new Date().toISOString(),
+      createdAt: new Date(2023, 11, 15, 10, 30).toISOString(),
       category: "Plan",
       exercises: [
         { name: "Mira por ejemplo", videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ" },
@@ -41,7 +41,7 @@ const ClientDashboard = ({ client, clientSessions }: ClientDashboardProps) => {
       fileSize: "2.5 MB",
       fileType: "Documento Adobe Acrobat",
       pdfUrl: "/sample-pdf.pdf",
-      createdAt: new Date().toISOString(),
+      createdAt: new Date(2024, 3, 2, 14, 15).toISOString(),
       category: "Plan",
       exercises: [
         { name: "Flat DB Press", videoUrl: "https://youtu.be/URQ1Wn7lYA?feature=shared" },
@@ -54,7 +54,7 @@ const ClientDashboard = ({ client, clientSessions }: ClientDashboardProps) => {
       fileSize: "1.8 MB",
       fileType: "Documento Adobe Acrobat",
       pdfUrl: "/sample-pdf.pdf",
-      createdAt: new Date().toISOString(),
+      createdAt: new Date(2024, 1, 10, 9, 45).toISOString(),
       category: "Guía",
       exercises: []
     },
@@ -64,7 +64,7 @@ const ClientDashboard = ({ client, clientSessions }: ClientDashboardProps) => {
       fileSize: "5.2 MB",
       fileType: "Documento Adobe Acrobat",
       pdfUrl: "/sample-pdf.pdf",
-      createdAt: new Date().toISOString(),
+      createdAt: new Date(2024, 2, 18, 16, 20).toISOString(),
       category: "Rutina",
       exercises: [
         { name: "Deadlift", videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ" },
@@ -78,9 +78,36 @@ const ClientDashboard = ({ client, clientSessions }: ClientDashboardProps) => {
       fileSize: "0.8 MB",
       fileType: "Documento Adobe Acrobat",
       pdfUrl: "/sample-pdf.pdf",
-      createdAt: new Date().toISOString(),
+      createdAt: new Date(2024, 3, 5, 11, 30).toISOString(),
       category: "Informe",
       exercises: []
+    },
+    {
+      id: "doc6",
+      title: "Rutina Definición Verano.pdf",
+      fileSize: "3.1 MB",
+      fileType: "Documento Adobe Acrobat",
+      pdfUrl: "/sample-pdf.pdf",
+      createdAt: new Date(2024, 3, 10, 8, 15).toISOString(),
+      category: "Rutina",
+      exercises: [
+        { name: "HIIT Training", videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ" },
+        { name: "Burpees", videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ" }
+      ]
+    },
+    {
+      id: "doc7",
+      title: "Guía de Estiramientos.pdf",
+      fileSize: "1.2 MB",
+      fileType: "Documento Adobe Acrobat",
+      pdfUrl: "/sample-pdf.pdf",
+      createdAt: new Date(2023, 10, 20, 15, 45).toISOString(),
+      category: "Guía",
+      exercises: [
+        { name: "Estiramiento de isquiotibiales", videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ" },
+        { name: "Estiramiento de cuádriceps", videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ" },
+        { name: "Estiramiento de hombros", videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ" }
+      ]
     }
   ];
   
