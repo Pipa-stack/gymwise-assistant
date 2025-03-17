@@ -7,10 +7,30 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import ProgressChart from "@/components/ProgressChart";
 import WorkoutTracker from "@/components/WorkoutTracker";
 import { generateProgressSummary, calculateBMI, getBMICategory } from "@/utils/progressUtils";
-import { ArrowLeft, Mail, Phone, User, Calendar, Target, ScrollText, LineChart, Dumbbell, MessageSquare } from "lucide-react";
+import { 
+  ArrowLeft, 
+  Mail, 
+  Phone, 
+  User, 
+  Calendar, 
+  Target, 
+  ScrollText, 
+  LineChart, 
+  Dumbbell, 
+  MessageSquare,
+  MoreHorizontal,
+  Plus,
+  ClipboardEdit
+} from "lucide-react";
 
 const ClientDetail = () => {
   const { clientId } = useParams();
@@ -50,19 +70,32 @@ const ClientDetail = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <Button variant="ghost" onClick={() => navigate("/clients")}>
-          <ArrowLeft className="mr-2 h-4 w-4" />
+        <Button variant="ghost" onClick={() => navigate("/clients")} className="gap-2">
+          <ArrowLeft className="h-4 w-4" />
           Volver a Clientes
         </Button>
         <div className="flex gap-2">
-          <Button variant="outline">
-            <MessageSquare className="mr-2 h-4 w-4" />
-            Enviar Mensaje
-          </Button>
           <Button>
-            <ScrollText className="mr-2 h-4 w-4" />
+            <ClipboardEdit className="mr-2 h-4 w-4" />
             Editar Plan
           </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="icon">
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => navigate("/chat")}>
+                <MessageSquare className="mr-2 h-4 w-4" />
+                Enviar Mensaje
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <Plus className="mr-2 h-4 w-4" />
+                Añadir Medición
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
       
@@ -178,7 +211,10 @@ const ClientDetail = () => {
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="flex justify-center py-6">
-                    <Button>Añadir Medición</Button>
+                    <Button>
+                      <Plus className="mr-2 h-4 w-4" />
+                      Añadir Medición
+                    </Button>
                   </CardContent>
                 </Card>
               )}
@@ -201,14 +237,17 @@ const ClientDetail = () => {
                               <div className="font-medium text-sm">{plan.name}</div>
                               <div className="text-xs text-muted-foreground">{plan.goal}</div>
                             </div>
-                            <Button variant="outline" size="sm">Ver Detalles</Button>
+                            <Button variant="outline" size="sm">Ver</Button>
                           </div>
                         ))}
                       </div>
                     ) : (
                       <div className="text-center py-6">
                         <p className="text-muted-foreground text-sm mb-4">No hay planes asignados</p>
-                        <Button>Asignar Plan</Button>
+                        <Button>
+                          <Plus className="mr-2 h-4 w-4" />
+                          Asignar Plan
+                        </Button>
                       </div>
                     )}
                   </CardContent>
@@ -218,8 +257,12 @@ const ClientDetail = () => {
             
             <TabsContent value="notes" className="space-y-4">
               <Card>
-                <CardHeader>
+                <CardHeader className="flex flex-row items-center justify-between">
                   <CardTitle className="text-base">Notas del Entrenador</CardTitle>
+                  <Button variant="outline" size="sm">
+                    <Plus className="mr-2 h-4 w-4" />
+                    Añadir Nota
+                  </Button>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
@@ -244,11 +287,6 @@ const ClientDetail = () => {
                         Ajustamos la técnica y reducimos peso.
                       </p>
                     </div>
-                    
-                    <Button variant="outline" className="w-full">
-                      <ScrollText className="mr-2 h-4 w-4" />
-                      Añadir Nota
-                    </Button>
                   </div>
                 </CardContent>
               </Card>
