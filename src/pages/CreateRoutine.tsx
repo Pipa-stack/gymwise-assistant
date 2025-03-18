@@ -39,6 +39,14 @@ const CreateRoutine = () => {
       if (existingRoutine) {
         setRoutine(existingRoutine);
         setRoutineTitle(existingRoutine.name);
+      } else {
+        // Manejar caso donde el ID no existe
+        toast({
+          title: "Rutina no encontrada",
+          description: "La rutina que intentas editar no existe",
+          variant: "destructive"
+        });
+        navigate("/training-plans");
       }
     } else {
       // Crear una nueva rutina
@@ -46,7 +54,7 @@ const CreateRoutine = () => {
       setRoutine(newRoutine);
       setRoutineTitle(newRoutine.name);
     }
-  }, [routineId, customRoutines, createCustomRoutine]);
+  }, [routineId, customRoutines, createCustomRoutine, navigate]);
 
   // Actualizar el título de la rutina
   useEffect(() => {
@@ -93,6 +101,12 @@ const CreateRoutine = () => {
     
     addExerciseToRoutine(routine.id, exerciseId);
     setShowExerciseDialog(false);
+    
+    const exerciseName = getExerciseById(exerciseId)?.name || "Ejercicio";
+    toast({
+      title: "Ejercicio añadido",
+      description: `${exerciseName} se ha añadido a tu rutina`
+    });
   };
 
   // Añadir una serie a un ejercicio
@@ -100,6 +114,10 @@ const CreateRoutine = () => {
     if (!routine) return;
     
     addSetToExercise(routine.id, exerciseId);
+    
+    toast({
+      description: "Serie añadida correctamente"
+    });
   };
 
   // Actualizar una serie de un ejercicio
@@ -130,7 +148,14 @@ const CreateRoutine = () => {
   const handleRemoveExercise = (exerciseId: string) => {
     if (!routine) return;
     
+    const exerciseName = routine.exercises.find(e => e.id === exerciseId)?.exerciseDetails?.name || "Ejercicio";
+    
     deleteExerciseFromRoutine(routine.id, exerciseId);
+    
+    toast({
+      title: "Ejercicio eliminado",
+      description: `${exerciseName} se ha eliminado de tu rutina`
+    });
   };
 
   if (!routine) {
@@ -147,23 +172,27 @@ const CreateRoutine = () => {
       <header className="flex items-center justify-between p-4 border-b border-gray-800">
         <Button 
           variant="ghost" 
-          onClick={() => navigate(-1)} 
+          onClick={() => navigate("/training-plans")} 
           className="text-blue-400 hover:text-blue-300 px-2"
         >
-          Cancelar
+          <ChevronLeft className="h-4 w-4 mr-1" />
+          Volver
         </Button>
-        <h1 className="text-xl font-medium">Crear Rutina</h1>
+        <h1 className="text-xl font-medium">
+          {routineId ? 'Editar Rutina' : 'Crear Rutina'}
+        </h1>
         <Button 
           onClick={handleSaveRoutine}
           className="bg-blue-500 hover:bg-blue-600 text-white px-4"
         >
+          <Save className="h-4 w-4 mr-1" />
           Guardar
         </Button>
       </header>
 
       {/* Alerta de ayuda */}
       <div className="bg-yellow-400 text-black p-4 relative">
-        <p className="pr-10">Estás creando una rutina. Toca para obtener ayuda...</p>
+        <p className="pr-10">Estás creando una rutina. Añade ejercicios y configura series, repeticiones y pesos.</p>
         <Button 
           variant="ghost" 
           size="icon" 
@@ -188,7 +217,7 @@ const CreateRoutine = () => {
       </div>
 
       {/* Lista de ejercicios */}
-      <div className="flex-1 p-4 space-y-4">
+      <div className="flex-1 p-4 space-y-4 overflow-y-auto">
         {routine.exercises.length === 0 ? (
           <div className="flex flex-col items-center justify-center space-y-6 py-12">
             <Dumbbell className="h-12 w-12 text-gray-500" strokeWidth={1.5} />

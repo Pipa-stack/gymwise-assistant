@@ -1,3 +1,4 @@
+
 import { useAppContext } from "@/context/AppContext";
 import { Button } from "@/components/ui/button";
 import { ArrowUpRight, FileText, Plus, Dumbbell } from "lucide-react";
@@ -6,6 +7,7 @@ import DocumentViewer from "@/components/dashboard/DocumentViewer";
 import ExerciseWeightProgress from "@/components/ExerciseWeightProgress";
 import ExerciseViewer from "@/components/ExerciseViewer";
 import { useEffect } from "react";
+import { toast } from "@/hooks/use-toast";
 
 const TrainingPlans = () => {
   const { 
@@ -16,7 +18,8 @@ const TrainingPlans = () => {
     addWeightHistory, 
     addSampleWeightHistory,
     setTrainingPlans,
-    customRoutines
+    customRoutines,
+    createCustomRoutine
   } = useAppContext();
   
   const clientId = mode === "client" ? clients[0]?.id : undefined;
@@ -200,6 +203,22 @@ const TrainingPlans = () => {
       ]
     }
   ];
+  
+  const handleCreatePlan = () => {
+    toast({
+      title: "Crear Plan",
+      description: "Funcionalidad para crear planes será implementada pronto"
+    });
+  };
+  
+  const handleCreateRoutine = () => {
+    const newRoutine = createCustomRoutine("Nueva Rutina");
+    toast({
+      title: "Nueva Rutina Creada",
+      description: "Se ha creado una nueva rutina personalizada"
+    });
+    return newRoutine.id;
+  };
 
   return (
     <div className="container mx-auto py-8 space-y-8">
@@ -207,7 +226,7 @@ const TrainingPlans = () => {
         <h1 className="text-3xl font-bold">Planes de Entrenamiento</h1>
         <div className="flex gap-2">
           {mode === "trainer" && (
-            <Button variant="outline">
+            <Button variant="outline" onClick={handleCreatePlan}>
               <Plus className="mr-2 h-4 w-4" />
               Crear Plan
             </Button>
@@ -312,6 +331,10 @@ const TrainingPlans = () => {
                           onAddWeight={(weight, reps, notes) => {
                             if (client) {
                               addWeightHistory(client.id, exercise.exerciseId, weight, reps, notes);
+                              toast({
+                                title: "Progreso guardado",
+                                description: `Se ha registrado tu progreso en ${exerciseDetails.name}`
+                              });
                             }
                           }}
                         />
