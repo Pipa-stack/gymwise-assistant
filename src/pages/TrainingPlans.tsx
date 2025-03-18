@@ -1,17 +1,113 @@
+
 import { useAppContext } from "@/context/AppContext";
 import { Button } from "@/components/ui/button";
-import { ArrowUpRight, FileText } from "lucide-react";
+import { ArrowUpRight, FileText, Plus } from "lucide-react";
 import DocumentViewer from "@/components/dashboard/DocumentViewer";
 import ExerciseWeightProgress from "@/components/ExerciseWeightProgress";
+import { useEffect } from "react";
 
 const TrainingPlans = () => {
-  const { trainingPlans, clients, mode, getExerciseById, addWeightHistory } = useAppContext();
+  const { 
+    trainingPlans, 
+    clients, 
+    mode, 
+    getExerciseById, 
+    addWeightHistory, 
+    addSampleWeightHistory,
+    setTrainingPlans 
+  } = useAppContext();
   
   // Si es cliente, mostrar solo sus planes
   const clientId = mode === "client" ? clients[0]?.id : undefined;
   const filteredPlans = clientId 
     ? trainingPlans.filter(plan => plan.clientId === clientId)
     : trainingPlans;
+
+  // Add sample comprehensive plan if none exists
+  useEffect(() => {
+    if (trainingPlans.length === 0 || !trainingPlans.some(plan => plan.id === "comprehensive-plan")) {
+      const sampleComprehensivePlan = {
+        id: "comprehensive-plan",
+        name: "Plan de Entrenamiento Completo - 12 Semanas",
+        description: "Plan de entrenamiento personalizado enfocado en fuerza e hipertrofia con progresión lineal",
+        goal: "Fuerza e Hipertrofia",
+        duration: 12,
+        createdAt: new Date().toISOString(),
+        clientId: clients[0]?.id,
+        workouts: [
+          {
+            id: "w1-comp",
+            day: 1,
+            name: "Día de Pecho y Tríceps",
+            exercises: [
+              { exerciseId: "e1", sets: 4, reps: 8, rest: 90, notes: "Aumentar peso cada semana" },
+              { exerciseId: "e4", sets: 3, reps: 10, rest: 60, notes: "Enfoque en contracción muscular" },
+              { exerciseId: "e5", sets: 3, reps: 12, rest: 45, notes: "Superset con press de hombros" }
+            ]
+          },
+          {
+            id: "w2-comp",
+            day: 2,
+            name: "Día de Espalda y Bíceps",
+            exercises: [
+              { exerciseId: "e3", sets: 4, reps: 8, rest: 90, notes: "Mantener espalda recta" },
+              { exerciseId: "e7", sets: 3, reps: 12, rest: 60, notes: "Enfoque en estirar al máximo" },
+              { exerciseId: "e9", sets: 3, reps: 15, rest: 45, notes: "Curl en banco Scott preferido" }
+            ]
+          },
+          {
+            id: "w3-comp",
+            day: 3,
+            name: "Día de Piernas",
+            exercises: [
+              { exerciseId: "e2", sets: 5, reps: 5, rest: 120, notes: "Progresión en peso es clave" },
+              { exerciseId: "e8", sets: 3, reps: 12, rest: 90, notes: "Control en la fase excéntrica" },
+              { exerciseId: "e6", sets: 3, reps: 15, rest: 60, notes: "Superset con extensiones" }
+            ]
+          },
+          {
+            id: "w4-comp",
+            day: 4,
+            name: "Día de Hombros y Abdominales",
+            exercises: [
+              { exerciseId: "e5", sets: 4, reps: 10, rest: 60, notes: "Enfoque en parte lateral y posterior" },
+              { exerciseId: "e10", sets: 3, reps: 12, rest: 45, notes: "Control en toda la amplitud" },
+              { exerciseId: "e11", sets: 3, reps: 15, rest: 30, notes: "Aumentar repeticiones progresivamente" }
+            ]
+          }
+        ]
+      };
+      
+      setTrainingPlans(prev => [...prev, sampleComprehensivePlan]);
+      
+      // Add sample weight history data for the first client
+      if (clients.length > 0) {
+        // For bench press
+        addSampleWeightHistory(clients[0].id, "e1", [
+          { weight: 60, reps: 8, date: new Date(Date.now() - 28 * 24 * 60 * 60 * 1000).toISOString(), notes: "Primera semana" },
+          { weight: 65, reps: 8, date: new Date(Date.now() - 21 * 24 * 60 * 60 * 1000).toISOString(), notes: "Buena técnica" },
+          { weight: 67.5, reps: 8, date: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(), notes: "Aumentando peso" },
+          { weight: 70, reps: 8, date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(), notes: "Progresando bien" }
+        ]);
+        
+        // For squat
+        addSampleWeightHistory(clients[0].id, "e2", [
+          { weight: 80, reps: 5, date: new Date(Date.now() - 28 * 24 * 60 * 60 * 1000).toISOString(), notes: "Profundidad adecuada" },
+          { weight: 85, reps: 5, date: new Date(Date.now() - 21 * 24 * 60 * 60 * 1000).toISOString(), notes: "Mejorando técnica" },
+          { weight: 90, reps: 5, date: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(), notes: "Sensación de fuerza" },
+          { weight: 95, reps: 5, date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(), notes: "Buen progreso" }
+        ]);
+        
+        // For deadlift
+        addSampleWeightHistory(clients[0].id, "e3", [
+          { weight: 100, reps: 8, date: new Date(Date.now() - 28 * 24 * 60 * 60 * 1000).toISOString(), notes: "Peso inicial" },
+          { weight: 110, reps: 8, date: new Date(Date.now() - 21 * 24 * 60 * 60 * 1000).toISOString(), notes: "Buen agarre" },
+          { weight: 115, reps: 8, date: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(), notes: "Espalda recta" },
+          { weight: 120, reps: 6, date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(), notes: "Reduciendo reps para aumentar peso" }
+        ]);
+      }
+    }
+  }, [trainingPlans, clients, setTrainingPlans, addSampleWeightHistory]);
 
   // Sample documents from the dashboard (you can move this to your context or API call)
   const sampleDocuments = [
@@ -111,7 +207,10 @@ const TrainingPlans = () => {
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Planes de Entrenamiento</h1>
         {mode === "trainer" && (
-          <Button variant="outline">Crear Plan</Button>
+          <Button variant="outline">
+            <Plus className="mr-2 h-4 w-4" />
+            Crear Plan
+          </Button>
         )}
       </div>
 
@@ -131,14 +230,24 @@ const TrainingPlans = () => {
         <div className="grid gap-6">
           {filteredPlans.map((plan) => (
             <div key={plan.id} className="space-y-4">
-              <h2 className="text-2xl font-semibold">{plan.name}</h2>
-              <p className="text-muted-foreground">{plan.description}</p>
+              <div className="bg-card shadow-sm rounded-lg p-6">
+                <h2 className="text-2xl font-semibold gradient-text mb-2">{plan.name}</h2>
+                <p className="text-muted-foreground mb-4">{plan.description}</p>
+                <div className="flex flex-wrap gap-2 mb-4">
+                  <span className="bg-primary/10 text-primary text-sm px-3 py-1 rounded-full">
+                    {plan.goal}
+                  </span>
+                  <span className="bg-secondary/10 text-secondary text-sm px-3 py-1 rounded-full">
+                    {plan.duration} semanas
+                  </span>
+                </div>
+              </div>
               
               {plan.workouts.map((workout) => (
                 <div key={workout.id} className="border rounded-lg p-4 space-y-4">
                   <h3 className="text-xl font-medium">Día {workout.day}: {workout.name}</h3>
                   
-                  <div className="grid gap-4 md:grid-cols-2">
+                  <div className="grid gap-6 md:grid-cols-2">
                     {workout.exercises.map((exercise) => {
                       const exerciseDetails = getExerciseById(exercise.exerciseId);
                       if (!exerciseDetails) return null;

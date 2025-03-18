@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { toast } from "@/hooks/use-toast";
 import { PdfDocumentProps } from "@/components/dashboard/PdfDocument";
@@ -102,6 +103,7 @@ interface AppContextProps {
   cancelSession: (sessionId: string) => void;
   getExerciseById: (id: string) => Exercise | undefined;
   addWeightHistory: (clientId: string, exerciseId: string, weight: number, reps: number, notes?: string) => void;
+  addSampleWeightHistory: (clientId: string, exerciseId: string, records: Omit<WeightHistory, "exerciseId">[]) => void;
 }
 
 const AppContext = createContext<AppContextProps | undefined>(undefined);
@@ -375,6 +377,26 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     });
   };
 
+  const addSampleWeightHistory = (clientId: string, exerciseId: string, records: Omit<WeightHistory, "exerciseId">[]) => {
+    const weightRecords = records.map(record => ({
+      ...record,
+      exerciseId
+    }));
+
+    setClients(prev => prev.map(client => {
+      if (client.id === clientId) {
+        const existingRecords = client.weightHistory || [];
+        const filteredExistingRecords = existingRecords.filter(r => r.exerciseId !== exerciseId);
+        
+        return {
+          ...client,
+          weightHistory: [...filteredExistingRecords, ...weightRecords]
+        };
+      }
+      return client;
+    }));
+  };
+
   const value = {
     mode,
     setMode,
@@ -392,7 +414,8 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     bookSession,
     cancelSession,
     getExerciseById,
-    addWeightHistory
+    addWeightHistory,
+    addSampleWeightHistory
   };
 
   return (
