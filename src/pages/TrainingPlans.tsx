@@ -1,4 +1,3 @@
-
 import { useAppContext } from "@/context/AppContext";
 import { Button } from "@/components/ui/button";
 import { ArrowUpRight, FileText, Plus, Dumbbell } from "lucide-react";
@@ -20,18 +19,15 @@ const TrainingPlans = () => {
     customRoutines
   } = useAppContext();
   
-  // Si es cliente, mostrar solo sus planes
   const clientId = mode === "client" ? clients[0]?.id : undefined;
   const filteredPlans = clientId 
     ? trainingPlans.filter(plan => plan.clientId === clientId)
     : trainingPlans;
 
-  // Filtrar rutinas personalizadas por cliente
   const filteredRoutines = clientId
     ? customRoutines.filter(routine => routine.clientId === clientId)
     : customRoutines;
 
-  // Add sample comprehensive plan if none exists
   useEffect(() => {
     if (trainingPlans.length === 0 || !trainingPlans.some(plan => plan.id === "comprehensive-plan")) {
       const sampleComprehensivePlan = {
@@ -88,9 +84,7 @@ const TrainingPlans = () => {
       
       setTrainingPlans(prev => [...prev, sampleComprehensivePlan]);
       
-      // Add sample weight history data for the first client
       if (clients.length > 0) {
-        // For bench press
         addSampleWeightHistory(clients[0].id, "e1", [
           { weight: 60, reps: 8, date: new Date(Date.now() - 28 * 24 * 60 * 60 * 1000).toISOString(), notes: "Primera semana" },
           { weight: 65, reps: 8, date: new Date(Date.now() - 21 * 24 * 60 * 60 * 1000).toISOString(), notes: "Buena técnica" },
@@ -98,7 +92,6 @@ const TrainingPlans = () => {
           { weight: 70, reps: 8, date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(), notes: "Progresando bien" }
         ]);
         
-        // For squat
         addSampleWeightHistory(clients[0].id, "e2", [
           { weight: 80, reps: 5, date: new Date(Date.now() - 28 * 24 * 60 * 60 * 1000).toISOString(), notes: "Profundidad adecuada" },
           { weight: 85, reps: 5, date: new Date(Date.now() - 21 * 24 * 60 * 60 * 1000).toISOString(), notes: "Mejorando técnica" },
@@ -106,7 +99,6 @@ const TrainingPlans = () => {
           { weight: 95, reps: 5, date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(), notes: "Buen progreso" }
         ]);
         
-        // For deadlift
         addSampleWeightHistory(clients[0].id, "e3", [
           { weight: 100, reps: 8, date: new Date(Date.now() - 28 * 24 * 60 * 60 * 1000).toISOString(), notes: "Peso inicial" },
           { weight: 110, reps: 8, date: new Date(Date.now() - 21 * 24 * 60 * 60 * 1000).toISOString(), notes: "Buen agarre" },
@@ -117,7 +109,6 @@ const TrainingPlans = () => {
     }
   }, [trainingPlans, clients, setTrainingPlans, addSampleWeightHistory]);
 
-  // Sample documents from the dashboard (you can move this to your context or API call)
   const sampleDocuments = [
     {
       id: "doc1",
@@ -221,14 +212,15 @@ const TrainingPlans = () => {
               Crear Plan
             </Button>
           )}
-          <Button as={Link} to="/create-routine" className="bg-primary hover:bg-primary/90">
-            <Dumbbell className="mr-2 h-4 w-4" />
-            Crear Rutina
-          </Button>
+          <Link to="/create-routine">
+            <Button className="bg-primary hover:bg-primary/90">
+              <Dumbbell className="mr-2 h-4 w-4" />
+              Crear Rutina
+            </Button>
+          </Link>
         </div>
       </div>
 
-      {/* Rutinas personalizadas */}
       {customRoutines.length > 0 && (
         <div className="space-y-4">
           <h2 className="text-2xl font-semibold">Mis Rutinas</h2>
@@ -295,10 +287,8 @@ const TrainingPlans = () => {
                 </div>
               </div>
               
-              {/* Visor de ejercicios del plan */}
               <ExerciseViewer planId={plan.id} />
               
-              {/* Progreso de pesos por ejercicio */}
               {plan.workouts.map((workout) => (
                 <div key={workout.id} className="border rounded-lg p-4 space-y-4">
                   <h3 className="text-xl font-medium">Día {workout.day}: {workout.name}</h3>
