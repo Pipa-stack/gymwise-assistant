@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { toast } from "@/hooks/use-toast";
 import { PdfDocumentProps } from "@/components/dashboard/PdfDocument";
@@ -177,7 +176,7 @@ const sampleExercises: Exercise[] = [
       "Empuja la barra hacia arriba hasta extender los brazos"
     ],
     videoUrl: "https://www.youtube.com/watch?v=rT7DgCr-3pg",
-    imageUrl: "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+    imageUrl: "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?auto=format&fit=crop&w=800"
   },
   {
     id: "e2",
@@ -185,7 +184,7 @@ const sampleExercises: Exercise[] = [
     category: "Piernas",
     target: ["Cuádriceps", "Glúteos", "Isquiotibiales"],
     difficulty: "intermediate",
-    description: "Ejercicio compuesto para desarrollar la fuerza y tamaño de las piernas",
+    description: "Ejercicio compuesto fundamental para el desarrollo de las piernas",
     steps: [
       "Coloca la barra sobre los trapecios",
       "Separa los pies a la anchura de los hombros",
@@ -193,7 +192,7 @@ const sampleExercises: Exercise[] = [
       "Empuja a través de los talones para volver a la posición inicial"
     ],
     videoUrl: "https://www.youtube.com/watch?v=ultWZbUMPL8",
-    imageUrl: "https://images.unsplash.com/photo-1534368786749-b63e05c92717?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+    imageUrl: "https://images.unsplash.com/photo-1534368786749-b63e05c92717?auto=format&fit=crop&w=800"
   },
   {
     id: "e3",
@@ -209,7 +208,151 @@ const sampleExercises: Exercise[] = [
       "Levanta la barra extendiendo las caderas y las rodillas"
     ],
     videoUrl: "https://www.youtube.com/watch?v=op9kVnSso6Q",
-    imageUrl: "https://images.unsplash.com/photo-1598971639058-a4a01a12931c?q=80&w=2016&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+    imageUrl: "https://images.unsplash.com/photo-1598971639058-a4a01a12931c?auto=format&fit=crop&w=800"
+  },
+  {
+    id: "e4",
+    name: "Pull-ups",
+    category: "Espalda",
+    target: ["Dorsales", "Bíceps", "Antebrazos"],
+    difficulty: "intermediate",
+    description: "Ejercicio corporal para desarrollar la espalda y los brazos",
+    steps: [
+      "Agarra la barra con las palmas hacia adelante",
+      "Cuelga con los brazos completamente extendidos",
+      "Tira de tu cuerpo hacia arriba hasta que tu barbilla supere la barra",
+      "Baja controladamente a la posición inicial"
+    ],
+    videoUrl: "https://www.youtube.com/watch?v=eGo4IYlbE5g",
+    imageUrl: "https://images.unsplash.com/photo-1526506118085-60ce8714f8c5?auto=format&fit=crop&w=800"
+  },
+  {
+    id: "e5",
+    name: "Press militar",
+    category: "Hombros",
+    target: ["Deltoides", "Tríceps", "Trapecio"],
+    difficulty: "intermediate",
+    description: "Ejercicio compuesto para desarrollar los hombros",
+    steps: [
+      "De pie, coloca la barra al nivel de los hombros",
+      "Mantén el core activado y la espalda recta",
+      "Empuja la barra hacia arriba hasta la extensión completa",
+      "Baja la barra controladamente a la posición inicial"
+    ],
+    videoUrl: "https://www.youtube.com/watch?v=2yjwXTZQDDI",
+    imageUrl: "https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?auto=format&fit=crop&w=800"
+  },
+  {
+    id: "e6",
+    name: "Curl de bíceps",
+    category: "Bíceps",
+    target: ["Bíceps", "Antebrazos"],
+    difficulty: "beginner",
+    description: "Ejercicio de aislamiento para bíceps",
+    steps: [
+      "De pie, sostén las mancuernas con los brazos extendidos",
+      "Mantén los codos pegados al cuerpo",
+      "Curl hacia arriba manteniendo los codos fijos",
+      "Baja controladamente a la posición inicial"
+    ],
+    videoUrl: "https://www.youtube.com/watch?v=ykJmrZ5v0Oo",
+    imageUrl: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=800"
+  },
+  {
+    id: "e7",
+    name: "Extensiones de tríceps",
+    category: "Tríceps",
+    target: ["Tríceps"],
+    difficulty: "beginner",
+    description: "Ejercicio de aislamiento para tríceps",
+    steps: [
+      "Siéntate en un banco con una mancuerna",
+      "Eleva la mancuerna sobre tu cabeza",
+      "Baja la mancuerna detrás de tu cabeza flexionando los codos",
+      "Extiende los brazos volviendo a la posición inicial"
+    ],
+    videoUrl: "https://www.youtube.com/watch?v=_gsUck-7M74",
+    imageUrl: "https://images.unsplash.com/photo-1597452485669-2c7bb5fef319?auto=format&fit=crop&w=800"
+  },
+  {
+    id: "e8",
+    name: "Crunch abdominal",
+    category: "Abdominales",
+    target: ["Abdominales superiores", "Oblicuos"],
+    difficulty: "beginner",
+    description: "Ejercicio básico para abdominales",
+    steps: [
+      "Acuéstate boca arriba con las rodillas flexionadas",
+      "Coloca las manos detrás de la cabeza",
+      "Eleva los hombros del suelo contrayendo los abdominales",
+      "Baja controladamente a la posición inicial"
+    ],
+    videoUrl: "https://www.youtube.com/watch?v=Xyd_fa5zoEU",
+    imageUrl: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=800"
+  },
+  {
+    id: "e9",
+    name: "Hip thrust",
+    category: "Glúteos",
+    target: ["Glúteos", "Isquiotibiales"],
+    difficulty: "intermediate",
+    description: "Ejercicio efectivo para el desarrollo de glúteos",
+    steps: [
+      "Siéntate en el suelo con la espalda apoyada en un banco",
+      "Coloca una barra sobre tus caderas",
+      "Empuja con los talones y eleva las caderas",
+      "Baja controladamente a la posición inicial"
+    ],
+    videoUrl: "https://www.youtube.com/watch?v=SEdqd1n0cvg",
+    imageUrl: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=800"
+  },
+  {
+    id: "e10",
+    name: "Remo con barra",
+    category: "Espalda",
+    target: ["Dorsales", "Romboides", "Bíceps"],
+    difficulty: "intermediate",
+    description: "Ejercicio compuesto para el desarrollo de la espalda",
+    steps: [
+      "Inclínate hacia adelante manteniendo la espalda recta",
+      "Agarra la barra con las manos más anchas que los hombros",
+      "Tira de la barra hacia tu estómago",
+      "Baja controladamente"
+    ],
+    videoUrl: "https://www.youtube.com/watch?v=G8l_8chR5BE",
+    imageUrl: "https://images.unsplash.com/photo-1552674605-db6ffd4facb5?auto=format&fit=crop&w=800"
+  },
+  {
+    id: "e11",
+    name: "Press inclinado",
+    category: "Pecho",
+    target: ["Pectorales superiores", "Deltoides anteriores", "Tríceps"],
+    difficulty: "intermediate",
+    description: "Variación del press de banca para enfatizar el pecho superior",
+    steps: [
+      "Acuéstate en un banco inclinado",
+      "Agarra la barra con un agarre ligeramente más ancho que los hombros",
+      "Baja la barra hacia la parte superior del pecho",
+      "Empuja la barra hacia arriba hasta la extensión completa"
+    ],
+    videoUrl: "https://www.youtube.com/watch?v=jPLdzuHckI8",
+    imageUrl: "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=800"
+  },
+  {
+    id: "e12",
+    name: "Zancadas",
+    category: "Piernas",
+    target: ["Cuádriceps", "Glúteos", "Isquiotibiales"],
+    difficulty: "intermediate",
+    description: "Ejercicio unilateral para el desarrollo de las piernas",
+    steps: [
+      "De pie, da un paso largo hacia adelante",
+      "Baja la rodilla trasera hacia el suelo",
+      "Mantén el torso erguido",
+      "Empuja con el pie delantero para volver a la posición inicial"
+    ],
+    videoUrl: "https://www.youtube.com/watch?v=3XDriUn0udo",
+    imageUrl: "https://images.unsplash.com/photo-1434608519344-49d77a699e1d?auto=format&fit=crop&w=800"
   }
 ];
 
