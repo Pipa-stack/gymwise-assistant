@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -9,6 +10,7 @@ import Index from "./pages/Index";
 import Clients from "./pages/Clients";
 import ClientDetail from "./pages/ClientDetail";
 import TrainingPlans from "./pages/TrainingPlans";
+import CreateRoutine from "./pages/CreateRoutine";
 import Exercises from "./pages/Exercises";
 import ExerciseLibrary from "./pages/ExerciseLibrary";
 import Calendar from "./pages/Calendar";
@@ -32,6 +34,8 @@ const App = () => (
               <Route path="/clients" element={<Clients />} />
               <Route path="/clients/:clientId" element={<ClientDetail />} />
               <Route path="/training-plans" element={<TrainingPlans />} />
+              <Route path="/create-routine" element={<CreateRoutine />} />
+              <Route path="/create-routine/:routineId" element={<CreateRoutine />} />
               <Route path="/exercises" element={<Exercises />} />
               <Route path="/exercise-library" element={<ExerciseLibrary />} />
               <Route path="/calendar" element={<Calendar />} />

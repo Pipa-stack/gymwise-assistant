@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { toast } from "@/hooks/use-toast";
 import { PdfDocumentProps } from "@/components/dashboard/PdfDocument";
@@ -66,6 +65,27 @@ export interface WorkoutExercise {
   weightHistory?: WeightHistory[];
 }
 
+export interface CustomRoutine {
+  id: string;
+  name: string;
+  createdAt: string;
+  clientId?: string;
+  exercises: CustomRoutineExercise[];
+}
+
+export interface CustomRoutineExercise {
+  id: string;
+  exerciseId: string;
+  sets: CustomRoutineSet[];
+}
+
+export interface CustomRoutineSet {
+  id: string;
+  setNumber: number;
+  weight: number;
+  reps: number;
+}
+
 export interface ScheduledSession {
   id: string;
   clientId: string;
@@ -93,6 +113,8 @@ interface AppContextProps {
   exercises: Exercise[];
   trainingPlans: TrainingPlan[];
   setTrainingPlans: React.Dispatch<React.SetStateAction<TrainingPlan[]>>;
+  customRoutines: CustomRoutine[];
+  setCustomRoutines: React.Dispatch<React.SetStateAction<CustomRoutine[]>>;
   sessions: ScheduledSession[];
   setSessions: React.Dispatch<React.SetStateAction<ScheduledSession[]>>;
   availableSlots: AvailableSlot[];
@@ -104,6 +126,13 @@ interface AppContextProps {
   getExerciseById: (id: string) => Exercise | undefined;
   addWeightHistory: (clientId: string, exerciseId: string, weight: number, reps: number, notes?: string) => void;
   addSampleWeightHistory: (clientId: string, exerciseId: string, records: Omit<WeightHistory, "exerciseId">[]) => void;
+  createCustomRoutine: (name: string, clientId?: string) => CustomRoutine;
+  updateCustomRoutine: (routineId: string, data: Partial<CustomRoutine>) => void;
+  addExerciseToRoutine: (routineId: string, exerciseId: string) => void;
+  addSetToExercise: (routineId: string, routineExerciseId: string) => void;
+  updateExerciseSet: (routineId: string, routineExerciseId: string, setId: string, weight: number, reps: number) => void;
+  deleteExerciseFromRoutine: (routineId: string, routineExerciseId: string) => void;
+  deleteSetFromExercise: (routineId: string, routineExerciseId: string, setId: string) => void;
 }
 
 const AppContext = createContext<AppContextProps | undefined>(undefined);
@@ -267,6 +296,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const [mode, setMode] = useState<UserMode>("client");
   const [clients, setClients] = useState<Client[]>(sampleClients);
   const [trainingPlans, setTrainingPlans] = useState<TrainingPlan[]>(sampleTrainingPlans);
+  const [customRoutines, setCustomRoutines] = useState<CustomRoutine[]>([]);
   const [sessions, setSessions] = useState<ScheduledSession[]>(sampleSessions);
   const [availableSlots, setAvailableSlots] = useState<AvailableSlot[]>(generateAvailableSlots());
   const [loading, setLoading] = useState<boolean>(true);
@@ -397,6 +427,188 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     }));
   };
 
+  const createCustomRoutine = (name: string, clientId?: string): CustomRoutine => {
+    const newRoutine: CustomRoutine = {
+      id: `routine-${Date.now()}`,
+      name: name || "Nueva Rutina",
+      createdAt: new Date().toISOString(),
+      clientId,
+      exercises: []
+    };
+    
+    setCustomRoutines(prev => [...prev, newRoutine]);
+    
+    toast({
+      title: "Rutina creada",
+      description: "La nueva rutina se ha creado correctamente"
+    });
+    
+    return newRoutine;
+  };
+  
+  const updateCustomRoutine = (routineId: string, data: Partial<CustomRoutine>) => {
+    setCustomRoutines(prev => 
+      prev.map(routine => 
+        routine.id === routineId 
+          ? { ...routine, ...data } 
+          : routine
+      )
+    );
+  };
+  
+  const addExerciseToRoutine = (routineId: string, exerciseId: string) => {
+    const routineExerciseId = `exercise-${Date.now()}`;
+    const initialSet = {
+      id: `set-${Date.now()}`,
+      setNumber: 1,
+      weight: 0,
+      reps: 0
+    };
+    
+    setCustomRoutines(prev => 
+      prev.map(routine => {
+        if (routine.id === routineId) {
+          return {
+            ...routine,
+            exercises: [
+              ...routine.exercises,
+              {
+                id: routineExerciseId,
+                exerciseId,
+                sets: [initialSet]
+              }
+            ]
+          };
+        }
+        return routine;
+      })
+    );
+    
+    toast({
+      title: "Ejercicio añadido",
+      description: "El ejercicio se ha añadido a la rutina"
+    });
+  };
+  
+  const addSetToExercise = (routineId: string, routineExerciseId: string) => {
+    setCustomRoutines(prev => 
+      prev.map(routine => {
+        if (routine.id === routineId) {
+          return {
+            ...routine,
+            exercises: routine.exercises.map(exercise => {
+              if (exercise.id === routineExerciseId) {
+                const newSetNumber = exercise.sets.length + 1;
+                return {
+                  ...exercise,
+                  sets: [
+                    ...exercise.sets,
+                    {
+                      id: `set-${Date.now()}-${newSetNumber}`,
+                      setNumber: newSetNumber,
+                      weight: 0,
+                      reps: 0
+                    }
+                  ]
+                };
+              }
+              return exercise;
+            })
+          };
+        }
+        return routine;
+      })
+    );
+  };
+  
+  const updateExerciseSet = (
+    routineId: string, 
+    routineExerciseId: string, 
+    setId: string, 
+    weight: number, 
+    reps: number
+  ) => {
+    setCustomRoutines(prev => 
+      prev.map(routine => {
+        if (routine.id === routineId) {
+          return {
+            ...routine,
+            exercises: routine.exercises.map(exercise => {
+              if (exercise.id === routineExerciseId) {
+                return {
+                  ...exercise,
+                  sets: exercise.sets.map(set => {
+                    if (set.id === setId) {
+                      return { ...set, weight, reps };
+                    }
+                    return set;
+                  })
+                };
+              }
+              return exercise;
+            })
+          };
+        }
+        return routine;
+      })
+    );
+  };
+  
+  const deleteExerciseFromRoutine = (routineId: string, routineExerciseId: string) => {
+    setCustomRoutines(prev => 
+      prev.map(routine => {
+        if (routine.id === routineId) {
+          return {
+            ...routine,
+            exercises: routine.exercises.filter(
+              exercise => exercise.id !== routineExerciseId
+            )
+          };
+        }
+        return routine;
+      })
+    );
+    
+    toast({
+      title: "Ejercicio eliminado",
+      description: "El ejercicio se ha eliminado de la rutina"
+    });
+  };
+  
+  const deleteSetFromExercise = (routineId: string, routineExerciseId: string, setId: string) => {
+    setCustomRoutines(prev => 
+      prev.map(routine => {
+        if (routine.id === routineId) {
+          return {
+            ...routine,
+            exercises: routine.exercises.map(exercise => {
+              if (exercise.id === routineExerciseId) {
+                // Solo eliminamos si hay más de un set
+                if (exercise.sets.length > 1) {
+                  const filteredSets = exercise.sets.filter(set => set.id !== setId);
+                  
+                  // Renumeramos los sets
+                  const renumberedSets = filteredSets.map((set, index) => ({
+                    ...set,
+                    setNumber: index + 1
+                  }));
+                  
+                  return {
+                    ...exercise,
+                    sets: renumberedSets
+                  };
+                }
+                return exercise;
+              }
+              return exercise;
+            })
+          };
+        }
+        return routine;
+      })
+    );
+  };
+
   const value = {
     mode,
     setMode,
@@ -405,6 +617,8 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     exercises: exercisesData,
     trainingPlans,
     setTrainingPlans,
+    customRoutines,
+    setCustomRoutines,
     sessions,
     setSessions,
     availableSlots,
@@ -415,7 +629,14 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     cancelSession,
     getExerciseById,
     addWeightHistory,
-    addSampleWeightHistory
+    addSampleWeightHistory,
+    createCustomRoutine,
+    updateCustomRoutine,
+    addExerciseToRoutine,
+    addSetToExercise,
+    updateExerciseSet,
+    deleteExerciseFromRoutine,
+    deleteSetFromExercise
   };
 
   return (

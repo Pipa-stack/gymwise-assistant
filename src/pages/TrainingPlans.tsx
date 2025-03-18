@@ -1,7 +1,8 @@
 
 import { useAppContext } from "@/context/AppContext";
 import { Button } from "@/components/ui/button";
-import { ArrowUpRight, FileText, Plus } from "lucide-react";
+import { ArrowUpRight, FileText, Plus, Dumbbell } from "lucide-react";
+import { Link } from "react-router-dom";
 import DocumentViewer from "@/components/dashboard/DocumentViewer";
 import ExerciseWeightProgress from "@/components/ExerciseWeightProgress";
 import ExerciseViewer from "@/components/ExerciseViewer";
@@ -15,7 +16,8 @@ const TrainingPlans = () => {
     getExerciseById, 
     addWeightHistory, 
     addSampleWeightHistory,
-    setTrainingPlans 
+    setTrainingPlans,
+    customRoutines
   } = useAppContext();
   
   // Si es cliente, mostrar solo sus planes
@@ -23,6 +25,11 @@ const TrainingPlans = () => {
   const filteredPlans = clientId 
     ? trainingPlans.filter(plan => plan.clientId === clientId)
     : trainingPlans;
+
+  // Filtrar rutinas personalizadas por cliente
+  const filteredRoutines = clientId
+    ? customRoutines.filter(routine => routine.clientId === clientId)
+    : customRoutines;
 
   // Add sample comprehensive plan if none exists
   useEffect(() => {
@@ -207,13 +214,57 @@ const TrainingPlans = () => {
     <div className="container mx-auto py-8 space-y-8">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Planes de Entrenamiento</h1>
-        {mode === "trainer" && (
-          <Button variant="outline">
-            <Plus className="mr-2 h-4 w-4" />
-            Crear Plan
+        <div className="flex gap-2">
+          {mode === "trainer" && (
+            <Button variant="outline">
+              <Plus className="mr-2 h-4 w-4" />
+              Crear Plan
+            </Button>
+          )}
+          <Button as={Link} to="/create-routine" className="bg-primary hover:bg-primary/90">
+            <Dumbbell className="mr-2 h-4 w-4" />
+            Crear Rutina
           </Button>
-        )}
+        </div>
       </div>
+
+      {/* Rutinas personalizadas */}
+      {customRoutines.length > 0 && (
+        <div className="space-y-4">
+          <h2 className="text-2xl font-semibold">Mis Rutinas</h2>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {filteredRoutines.map(routine => (
+              <Link 
+                key={routine.id} 
+                to={`/create-routine/${routine.id}`}
+                className="bg-card hover:bg-accent/30 transition-colors shadow-sm rounded-lg p-6 card-hover"
+              >
+                <h3 className="text-xl font-semibold mb-2">{routine.name}</h3>
+                <p className="text-sm text-muted-foreground mb-3">
+                  {new Date(routine.createdAt).toLocaleDateString()}
+                </p>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm">
+                    {routine.exercises.length} ejercicios
+                  </span>
+                  <ArrowUpRight className="h-4 w-4 text-primary" />
+                </div>
+              </Link>
+            ))}
+            
+            <Link
+              to="/create-routine"
+              className="border-2 border-dashed border-muted-foreground/20 hover:border-primary/50 rounded-lg p-6 flex flex-col items-center justify-center text-center hover:bg-accent/10 transition-colors h-full min-h-[180px]"
+            >
+              <Plus className="h-8 w-8 mb-2 text-muted-foreground" />
+              <p className="font-medium">Crear nueva rutina</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                Personaliza tu entrenamiento
+              </p>
+            </Link>
+          </div>
+        </div>
+      )}
 
       <div className="space-y-6">
         {mode === "trainer" && (
