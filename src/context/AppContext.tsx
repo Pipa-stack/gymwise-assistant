@@ -19,6 +19,7 @@ export interface Client {
   photo?: string;
   progress?: Progress[];
   documents?: PdfDocumentProps[];
+  weightHistory?: WeightHistory[];
 }
 
 export interface Progress {
@@ -26,6 +27,14 @@ export interface Progress {
   weight: number;
   bodyFat?: number;
   musclePercentage?: number;
+  notes?: string;
+}
+
+export interface WeightHistory {
+  exerciseId: string;
+  date: string;
+  weight: number;
+  reps: number;
   notes?: string;
 }
 
@@ -53,6 +62,7 @@ export interface WorkoutExercise {
   reps: number;
   rest: number;
   notes?: string;
+  weightHistory?: WeightHistory[];
 }
 
 export interface ScheduledSession {
@@ -91,6 +101,7 @@ interface AppContextProps {
   bookSession: (clientId: string, slotId: string) => void;
   cancelSession: (sessionId: string) => void;
   getExerciseById: (id: string) => Exercise | undefined;
+  addWeightHistory: (clientId: string, exerciseId: string, weight: number, reps: number, notes?: string) => void;
 }
 
 const AppContext = createContext<AppContextProps | undefined>(undefined);
@@ -339,6 +350,31 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     return exercisesData.find(exercise => exercise.id === id);
   };
 
+  const addWeightHistory = (clientId: string, exerciseId: string, weight: number, reps: number, notes?: string) => {
+    const newWeightRecord: WeightHistory = {
+      exerciseId,
+      date: new Date().toISOString(),
+      weight,
+      reps,
+      notes
+    };
+
+    setClients(prev => prev.map(client => {
+      if (client.id === clientId) {
+        return {
+          ...client,
+          weightHistory: [...(client.weightHistory || []), newWeightRecord]
+        };
+      }
+      return client;
+    }));
+
+    toast({
+      title: "Peso registrado",
+      description: "El progreso ha sido guardado correctamente"
+    });
+  };
+
   const value = {
     mode,
     setMode,
@@ -355,7 +391,8 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     setLoading,
     bookSession,
     cancelSession,
-    getExerciseById
+    getExerciseById,
+    addWeightHistory
   };
 
   return (
