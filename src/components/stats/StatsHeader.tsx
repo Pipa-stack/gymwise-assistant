@@ -25,7 +25,7 @@ const StatsHeader = ({
 }: StatsHeaderProps) => {
   return (
     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-      <h1 className="text-3xl font-bold tracking-tight">Estadísticas</h1>
+      <h1 className="text-3xl font-bold">Estadísticas</h1>
       <div className="flex items-center gap-2">
         {mode === "trainer" && (
           <Select value={activeClient} onValueChange={setActiveClient}>
@@ -52,11 +52,10 @@ const StatsHeader = ({
         </Select>
         
         <Button 
-          variant="default" 
-          size="sm"
           onClick={onAddMeasurement}
+          className="bg-primary text-white rounded-md flex items-center gap-2"
         >
-          <PlusCircle className="h-4 w-4 mr-2" />
+          <PlusCircle className="h-4 w-4" />
           Añadir Medición
         </Button>
       </div>

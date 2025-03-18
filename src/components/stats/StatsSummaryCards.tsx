@@ -1,5 +1,5 @@
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Progress } from "@/context/AppContext";
 import { calculateBMI, getBMICategory } from "@/utils/progressUtils";
 
@@ -44,82 +44,76 @@ const StatsSummaryCards = ({
 
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground">
+      <Card className="p-5 shadow-sm">
+        <div className="space-y-2">
+          <h3 className="text-sm text-muted-foreground font-normal">
             Peso Actual
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
+          </h3>
           <div className="flex items-baseline justify-between">
-            <div className="text-3xl font-semibold">
-              {progressData.length > 0 ? currentWeight : "N/A"} kg
+            <div className="text-2xl font-semibold">
+              {progressData.length > 0 ? currentWeight : "0"} kg
             </div>
             {progressData.length > 1 && (
               <div className={`text-xs font-medium ${
-                calculateTrend('weight').isPositive ? 'text-green-600' : 'text-red-600'
+                calculateTrend('weight').isPositive ? 'text-green-500' : 'text-red-500'
               }`}>
                 {calculateTrend('weight').isPositive ? '↓' : '↑'} {calculateTrend('weight').value}%
               </div>
             )}
           </div>
-        </CardContent>
+        </div>
       </Card>
 
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground">
+      <Card className="p-5 shadow-sm">
+        <div className="space-y-2">
+          <h3 className="text-sm text-muted-foreground font-normal">
             % Grasa Corporal
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
+          </h3>
           <div className="flex items-baseline justify-between">
-            <div className="text-3xl font-semibold">
-              {currentBodyFat ? `${currentBodyFat}%` : "N/A"}
+            <div className="text-2xl font-semibold">
+              {currentBodyFat ? `${currentBodyFat}%` : "0%"}
             </div>
             {progressData.length > 1 && currentBodyFat && (
               <div className={`text-xs font-medium ${
-                calculateTrend('bodyFat').isPositive ? 'text-green-600' : 'text-red-600'
+                calculateTrend('bodyFat').isPositive ? 'text-green-500' : 'text-red-500'
               }`}>
                 {calculateTrend('bodyFat').isPositive ? '↓' : '↑'} {calculateTrend('bodyFat').value}%
               </div>
             )}
           </div>
-        </CardContent>
+        </div>
       </Card>
 
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground">
+      <Card className="p-5 shadow-sm">
+        <div className="space-y-2">
+          <h3 className="text-sm text-muted-foreground font-normal">
             Sesiones Completadas
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
+          </h3>
           <div className="flex items-baseline justify-between">
-            <div className="text-3xl font-semibold">
+            <div className="text-2xl font-semibold">
               {completedSessions}
             </div>
             <div className="text-xs text-muted-foreground">
               ~{sessionsPerWeek} / semana
             </div>
           </div>
-        </CardContent>
+        </div>
       </Card>
 
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground">
+      <Card className="p-5 shadow-sm">
+        <div className="space-y-2">
+          <h3 className="text-sm text-muted-foreground font-normal">
             IMC (Índice de Masa Corporal)
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-3xl font-semibold">
-            {bmi ? bmi.toFixed(1) : "N/A"}
+          </h3>
+          <div className="flex flex-col">
+            <div className="text-2xl font-semibold">
+              {bmi ? bmi.toFixed(1) : "0"}
+            </div>
+            <div className="text-xs text-muted-foreground">
+              {bmiCategory}
+            </div>
           </div>
-          <div className="text-xs text-muted-foreground mt-1">
-            {bmiCategory}
-          </div>
-        </CardContent>
+        </div>
       </Card>
     </div>
   );

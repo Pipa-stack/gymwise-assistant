@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useAppContext } from "@/context/AppContext";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Activity, TrendingUp, CalendarClock, PieChart, Users } from "lucide-react";
+import { Activity, TrendingUp, CalendarClock } from "lucide-react";
 import { format, subDays, isSameDay } from "date-fns";
 import { es } from "date-fns/locale";
 import { Progress } from "@/context/AppContext";
@@ -85,7 +85,7 @@ const Stats = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <StatsHeader 
         mode={mode}
         activeClient={activeClient}
@@ -104,28 +104,20 @@ const Stats = () => {
       />
 
       <Tabs defaultValue="overview" className="space-y-6">
-        <div className="flex items-center justify-between">
-          <TabsList>
-            <TabsTrigger value="overview" className="flex items-center gap-1">
-              <Activity className="h-4 w-4" />
-              <span>Resumen</span>
-            </TabsTrigger>
-            <TabsTrigger value="progress" className="flex items-center gap-1">
-              <TrendingUp className="h-4 w-4" />
-              <span>Progreso</span>
-            </TabsTrigger>
-            <TabsTrigger value="activity" className="flex items-center gap-1">
-              <CalendarClock className="h-4 w-4" />
-              <span>Actividad</span>
-            </TabsTrigger>
-            {mode === "trainer" && (
-              <TabsTrigger value="distribution" className="flex items-center gap-1">
-                <PieChart className="h-4 w-4" />
-                <span>Distribución</span>
-              </TabsTrigger>
-            )}
-          </TabsList>
-        </div>
+        <TabsList className="border-b w-full flex justify-start space-x-2">
+          <TabsTrigger value="overview" className="flex items-center gap-1">
+            <Activity className="h-4 w-4" />
+            <span>Resumen</span>
+          </TabsTrigger>
+          <TabsTrigger value="progress" className="flex items-center gap-1">
+            <TrendingUp className="h-4 w-4" />
+            <span>Progreso</span>
+          </TabsTrigger>
+          <TabsTrigger value="activity" className="flex items-center gap-1">
+            <CalendarClock className="h-4 w-4" />
+            <span>Actividad</span>
+          </TabsTrigger>
+        </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
           <OverviewTabContent 
@@ -149,12 +141,6 @@ const Stats = () => {
         <TabsContent value="activity" className="space-y-6">
           <ActivityTabContent completedSessions={completedSessions} />
         </TabsContent>
-
-        {mode === "trainer" && (
-          <TabsContent value="distribution" className="space-y-6">
-            <DistributionTabContent clients={clients} />
-          </TabsContent>
-        )}
       </Tabs>
 
       <AddMeasurementDialog 

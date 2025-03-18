@@ -14,7 +14,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
     
-    --primary: 222 47% 31%;
+    --primary: 214 100% 60%;
     --primary-foreground: 210 40% 98%;
     
     --secondary: 210 40% 96.1%;
@@ -23,7 +23,7 @@
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
     
-    --accent: 210 40% 90%;
+    --accent: 210 40% 96.1%;
     --accent-foreground: 222 47% 11%;
     
     --destructive: 0 84.2% 60.2%;
@@ -34,6 +34,8 @@
     --ring: 222 47% 31%;
 
     --radius: 0.5rem;
+    
+    --success: 142 71% 45%;
   }
 
   .dark {
@@ -46,7 +48,7 @@
     --popover: 222 47% 11%;
     --popover-foreground: 210 40% 98%;
  
-    --primary: 210 40% 98%;
+    --primary: 214 100% 60%;
     --primary-foreground: 222 47% 11%;
  
     --secondary: 217.2 32.6% 17.5%;
@@ -79,15 +81,15 @@
 
 @layer components {
   .glass-card {
-    @apply bg-white/70 dark:bg-black/10 backdrop-blur-sm border border-white/20 dark:border-white/5 shadow;
+    @apply bg-white shadow-sm border border-gray-200 rounded-lg;
   }
   
   .hover-card {
-    @apply transition-all duration-200 hover:scale-[1.01] hover:shadow;
+    @apply transition-all duration-200;
   }
   
   .gradient-text {
-    @apply bg-gradient-to-r from-primary via-primary/80 to-primary bg-clip-text text-transparent;
+    @apply text-primary font-medium;
   }
 }
 
@@ -105,60 +107,21 @@
   @apply bg-muted-foreground/20 rounded-full hover:bg-muted-foreground/30 transition-colors;
 }
 
-/* Loading image effects */
-.blur-load {
-  background-size: cover;
-  background-position: center;
-  position: relative;
-}
-
-.blur-load::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  animation: pulse 2.5s infinite;
-  @apply bg-muted/5;
-}
-
-@keyframes pulse {
-  0% { @apply bg-muted/0; }
-  50% { @apply bg-muted/5; }
-  100% { @apply bg-muted/0; }
-}
-
-.blur-load.loaded::before {
-  display: none;
-}
-
-.blur-load img {
-  opacity: 0;
-  transition: opacity 0.3s ease-in-out;
-}
-
-.blur-load.loaded img {
-  opacity: 1;
-}
-
 /* Page transition effects */
 .page-transition-enter {
   opacity: 0;
-  transform: translateY(4px);
 }
 
 .page-transition-enter-active {
   opacity: 1;
-  transform: translateY(0);
-  transition: opacity 0.3s, transform 0.3s;
+  transition: opacity 0.2s;
 }
 
 .page-transition-exit {
   opacity: 1;
-  transform: translateY(0);
 }
 
 .page-transition-exit-active {
   opacity: 0;
-  transform: translateY(-4px);
-  transition: opacity 0.2s, transform 0.2s;
+  transition: opacity 0.2s;
 }
-
