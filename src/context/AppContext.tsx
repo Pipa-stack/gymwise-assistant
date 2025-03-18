@@ -29,18 +29,6 @@ export interface Progress {
   notes?: string;
 }
 
-export interface Exercise {
-  id: string;
-  name: string;
-  category: string;
-  target: string[];
-  difficulty: "beginner" | "intermediate" | "advanced";
-  description: string;
-  steps: string[];
-  videoUrl?: string;
-  imageUrl?: string;
-}
-
 export interface TrainingPlan {
   id: string;
   name: string;
