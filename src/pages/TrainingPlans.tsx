@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowUpRight, FileText, Plus } from "lucide-react";
 import DocumentViewer from "@/components/dashboard/DocumentViewer";
 import ExerciseWeightProgress from "@/components/ExerciseWeightProgress";
+import ExerciseViewer from "@/components/ExerciseViewer";
 import { useEffect } from "react";
 
 const TrainingPlans = () => {
@@ -243,6 +244,10 @@ const TrainingPlans = () => {
                 </div>
               </div>
               
+              {/* Visor de ejercicios del plan */}
+              <ExerciseViewer planId={plan.id} />
+              
+              {/* Progreso de pesos por ejercicio */}
               {plan.workouts.map((workout) => (
                 <div key={workout.id} className="border rounded-lg p-4 space-y-4">
                   <h3 className="text-xl font-medium">Día {workout.day}: {workout.name}</h3>
