@@ -16,10 +16,6 @@ import Calendar from "./pages/Calendar";
 import Chat from "./pages/Chat";
 import Stats from "./pages/Stats";
 import Profile from "./pages/Profile";
-import Nutrition from "./pages/Nutrition";
-import TechniqueAnalysis from "./pages/TechniqueAnalysis";
-import Achievements from "./pages/Achievements";
-import Social from "./pages/Social";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -43,10 +39,6 @@ const App = () => (
               <Route path="/chat" element={<Chat />} />
               <Route path="/stats" element={<Stats />} />
               <Route path="/profile" element={<Profile />} />
-              <Route path="/nutrition" element={<Nutrition />} />
-              <Route path="/technique" element={<TechniqueAnalysis />} />
-              <Route path="/achievements" element={<Achievements />} />
-              <Route path="/social" element={<Social />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Layout>

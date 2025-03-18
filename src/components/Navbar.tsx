@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAppContext } from "@/context/AppContext";
@@ -11,17 +10,10 @@ import {
   Menu, 
   X,
   User,
-  LineChart,
-  Apple,
-  Activity,
-  Flame, 
-  Landmark,
-  ClipboardCheck,
-  TrendingUp,
   Settings,
-  Award,
-  Search,
-  BookOpen
+  Landmark,
+  BookOpen,
+  BarChart
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -47,27 +39,37 @@ const Navbar = () => {
   const navLinksTrainer = [
     { name: "Dashboard", path: "/", icon: <Home className="h-5 w-5" /> },
     { name: "Clientes", path: "/clients", icon: <Users className="h-5 w-5" /> },
-    { name: "Planes", path: "/training-plans", icon: <ClipboardCheck className="h-5 w-5" /> },
-    { name: "Ejercicios", path: "/exercises", icon: <Dumbbell className="h-5 w-5" /> },
-    { name: "Biblioteca", path: "/exercise-library", icon: <BookOpen className="h-5 w-5" /> },
+    { 
+      name: "Entrenamiento", 
+      path: "/training-plans", 
+      icon: <Dumbbell className="h-5 w-5" />,
+      subItems: [
+        { name: "Planes", path: "/training-plans" },
+        { name: "Ejercicios", path: "/exercises" },
+        { name: "Biblioteca", path: "/exercise-library" },
+      ]
+    },
     { name: "Calendario", path: "/calendar", icon: <Calendar className="h-5 w-5" /> },
-    { name: "Progreso", path: "/stats", icon: <TrendingUp className="h-5 w-5" /> },
-    { name: "Comunidad", path: "/social", icon: <Users className="h-5 w-5" /> },
-    { name: "Logros", path: "/achievements", icon: <Award className="h-5 w-5" /> },
-    { name: "Asistente", path: "/chat", icon: <MessageCircle className="h-5 w-5" /> }
+    { name: "Métricas", path: "/stats", icon: <BarChart className="h-5 w-5" /> },
+    { name: "Chat", path: "/chat", icon: <MessageCircle className="h-5 w-5" /> }
   ];
 
   const navLinksClient = [
     { name: "Dashboard", path: "/", icon: <Home className="h-5 w-5" /> },
     { name: "Mi Perfil", path: "/profile", icon: <User className="h-5 w-5" /> },
-    { name: "Mi Plan", path: "/training-plans", icon: <Dumbbell className="h-5 w-5" /> },
-    { name: "Ejercicios", path: "/exercises", icon: <Dumbbell className="h-5 w-5" /> },
-    { name: "Biblioteca", path: "/exercise-library", icon: <BookOpen className="h-5 w-5" /> },
+    { 
+      name: "Mi Entrenamiento", 
+      path: "/training-plans", 
+      icon: <Dumbbell className="h-5 w-5" />,
+      subItems: [
+        { name: "Mi Plan", path: "/training-plans" },
+        { name: "Ejercicios", path: "/exercises" },
+        { name: "Biblioteca", path: "/exercise-library" },
+      ]
+    },
     { name: "Calendario", path: "/calendar", icon: <Calendar className="h-5 w-5" /> },
-    { name: "Nutrición", path: "/nutrition", icon: <Apple className="h-5 w-5" /> },
-    { name: "Técnica", path: "/technique", icon: <Activity className="h-5 w-5" /> },
-    { name: "Comunidad", path: "/social", icon: <Users className="h-5 w-5" /> },
-    { name: "Asistente", path: "/chat", icon: <MessageCircle className="h-5 w-5" /> }
+    { name: "Mi Progreso", path: "/stats", icon: <BarChart className="h-5 w-5" /> },
+    { name: "Chat", path: "/chat", icon: <MessageCircle className="h-5 w-5" /> }
   ];
 
   const navLinks = mode === "trainer" ? navLinksTrainer : navLinksClient;
@@ -81,7 +83,7 @@ const Navbar = () => {
           : "bg-background/50"
       )}
     >
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 md:px-8 lg:px-12">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 md:px-8">
         <div className="flex items-center space-x-2">
           <Link to="/" className="flex items-center space-x-2">
             <div className="relative h-8 w-8 overflow-hidden rounded-full bg-primary text-primary-foreground">
@@ -97,24 +99,43 @@ const Navbar = () => {
         </div>
 
         {/* Desktop Navigation */}
-        <div className="hidden md:flex md:items-center md:space-x-4 lg:space-x-6">
+        <div className="hidden md:flex md:items-center md:space-x-1">
           {navLinks.map((link) => (
-            <Link
-              key={link.path}
-              to={link.path}
-              className={cn(
-                "group flex items-center space-x-1 rounded-md px-3 py-2 text-sm font-medium transition-all hover:bg-accent",
-                location.pathname === link.path
-                  ? "bg-accent text-foreground"
-                  : "text-muted-foreground"
+            <div key={link.path} className="relative group">
+              <Link
+                to={link.path}
+                className={cn(
+                  "flex items-center space-x-1 rounded-md px-3 py-2 text-sm font-medium transition-all hover:bg-accent",
+                  location.pathname === link.path
+                    ? "bg-accent text-foreground"
+                    : "text-muted-foreground"
+                )}
+              >
+                {link.icon}
+                <span>{link.name}</span>
+              </Link>
+              
+              {link.subItems && (
+                <div className="absolute left-0 mt-1 w-48 origin-top-right rounded-md bg-popover shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
+                  <div className="py-1">
+                    {link.subItems.map((subItem) => (
+                      <Link
+                        key={subItem.path}
+                        to={subItem.path}
+                        className={cn(
+                          "block px-4 py-2 text-sm hover:bg-accent",
+                          location.pathname === subItem.path
+                            ? "bg-accent/50 text-foreground"
+                            : "text-muted-foreground"
+                        )}
+                      >
+                        {subItem.name}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
               )}
-            >
-              {link.icon}
-              <span>{link.name}</span>
-              {location.pathname === link.path && (
-                <div className="absolute bottom-0 left-0 h-0.5 w-full bg-primary" />
-              )}
-            </Link>
+            </div>
           ))}
         </div>
 
@@ -142,19 +163,39 @@ const Navbar = () => {
       >
         <div className="space-y-1 p-4">
           {navLinks.map((link) => (
-            <Link
-              key={link.path}
-              to={link.path}
-              className={cn(
-                "flex items-center space-x-2 rounded-md px-4 py-3 text-sm font-medium transition-all",
-                location.pathname === link.path
-                  ? "bg-accent text-foreground"
-                  : "text-muted-foreground hover:bg-accent/50"
+            <div key={link.path}>
+              <Link
+                to={link.path}
+                className={cn(
+                  "flex items-center space-x-2 rounded-md px-4 py-3 text-sm font-medium transition-all",
+                  location.pathname === link.path
+                    ? "bg-accent text-foreground"
+                    : "text-muted-foreground hover:bg-accent/50"
+                )}
+              >
+                {link.icon}
+                <span>{link.name}</span>
+              </Link>
+              
+              {link.subItems && (
+                <div className="ml-4 mt-1 space-y-1">
+                  {link.subItems.map((subItem) => (
+                    <Link
+                      key={subItem.path}
+                      to={subItem.path}
+                      className={cn(
+                        "block rounded-md px-4 py-2 text-sm transition-all",
+                        location.pathname === subItem.path
+                          ? "bg-accent/50 text-foreground"
+                          : "text-muted-foreground hover:bg-accent/30"
+                      )}
+                    >
+                      {subItem.name}
+                    </Link>
+                  ))}
+                </div>
               )}
-            >
-              {link.icon}
-              <span>{link.name}</span>
-            </Link>
+            </div>
           ))}
         </div>
       </div>
