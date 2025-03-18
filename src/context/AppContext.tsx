@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { toast } from "@/hooks/use-toast";
 import { PdfDocumentProps } from "@/components/dashboard/PdfDocument";
+import { exercisesData, Exercise } from '@/data/exercisesData';
 
 // Types for our data models
 export type UserMode = "trainer" | "client";
@@ -462,10 +463,10 @@ const generateAvailableSlots = (): AvailableSlot[] => {
   return slots;
 };
 
-export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const [mode, setMode] = useState<UserMode>("client"); // Changed default mode to "client"
   const [clients, setClients] = useState<Client[]>(sampleClients);
-  const [exercises, setExercises] = useState<Exercise[]>(sampleExercises);
+  const [exercises] = useState<Exercise[]>(exercisesData);
   const [trainingPlans, setTrainingPlans] = useState<TrainingPlan[]>(sampleTrainingPlans);
   const [sessions, setSessions] = useState<ScheduledSession[]>(sampleSessions);
   const [availableSlots, setAvailableSlots] = useState<AvailableSlot[]>(generateAvailableSlots());
@@ -581,7 +582,11 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     getExerciseById
   };
 
-  return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
+  return (
+    <AppContext.Provider value={value}>
+      {children}
+    </AppContext.Provider>
+  );
 };
 
 export const useAppContext = () => {
