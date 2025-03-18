@@ -99,13 +99,16 @@ const CreateRoutine = () => {
   const handleAddExercise = (exerciseId: string) => {
     if (!routine) return;
     
+    // Importante: Agregar el ejercicio a la rutina
     addExerciseToRoutine(routine.id, exerciseId);
     setShowExerciseDialog(false);
     
-    const exerciseName = getExerciseById(exerciseId)?.name || "Ejercicio";
+    // Obtener el nombre del ejercicio para el toast
+    const exercise = getExerciseById(exerciseId);
+    
     toast({
       title: "Ejercicio añadido",
-      description: `${exerciseName} se ha añadido a tu rutina`
+      description: `${exercise?.name || "Ejercicio"} se ha añadido a tu rutina`
     });
   };
 
@@ -148,10 +151,11 @@ const CreateRoutine = () => {
   const handleRemoveExercise = (exerciseId: string) => {
     if (!routine) return;
     
-    const exercise = routine.exercises.find(e => e.id === exerciseId);
-    if (!exercise) return;
+    const routineExercise = routine.exercises.find(e => e.id === exerciseId);
+    if (!routineExercise) return;
     
-    const exerciseName = getExerciseById(exercise.exerciseId)?.name || "Ejercicio";
+    const exercise = getExerciseById(routineExercise.exerciseId);
+    const exerciseName = exercise?.name || "Ejercicio";
     
     deleteExerciseFromRoutine(routine.id, exerciseId);
     
@@ -324,7 +328,7 @@ const CreateRoutine = () => {
 
       {/* Diálogo para añadir ejercicio */}
       <Dialog open={showExerciseDialog} onOpenChange={setShowExerciseDialog}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md bg-background">
           <DialogHeader>
             <DialogTitle className="text-center">Agregar Ejercicio</DialogTitle>
             <DialogDescription className="text-center">
