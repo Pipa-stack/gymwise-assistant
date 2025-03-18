@@ -5,7 +5,7 @@ import { useAppContext } from "@/context/AppContext";
 import { X, Plus, Clock, Dumbbell, Search, ChevronLeft, Save } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
 
 const CreateRoutine = () => {
@@ -148,7 +148,6 @@ const CreateRoutine = () => {
   const handleRemoveExercise = (exerciseId: string) => {
     if (!routine) return;
     
-    // Fixed: Use getExerciseById to get exercise name instead of accessing nonexistent property
     const exercise = routine.exercises.find(e => e.id === exerciseId);
     if (!exercise) return;
     
@@ -171,13 +170,13 @@ const CreateRoutine = () => {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-black text-white">
+    <div className="flex flex-col min-h-screen bg-background text-foreground">
       {/* Header */}
-      <header className="flex items-center justify-between p-4 border-b border-gray-800">
+      <header className="flex items-center justify-between p-4 border-b">
         <Button 
           variant="ghost" 
           onClick={() => navigate("/training-plans")} 
-          className="text-blue-400 hover:text-blue-300 px-2"
+          className="text-primary hover:text-primary/80 px-2"
         >
           <ChevronLeft className="h-4 w-4 mr-1" />
           Volver
@@ -187,7 +186,7 @@ const CreateRoutine = () => {
         </h1>
         <Button 
           onClick={handleSaveRoutine}
-          className="bg-blue-500 hover:bg-blue-600 text-white px-4"
+          className="bg-primary text-primary-foreground hover:bg-primary/90 px-4"
         >
           <Save className="h-4 w-4 mr-1" />
           Guardar
@@ -216,7 +215,7 @@ const CreateRoutine = () => {
           value={routineTitle}
           onChange={(e) => setRoutineTitle(e.target.value)}
           placeholder="Título de la Rutina"
-          className="bg-transparent border-b border-gray-700 rounded-none px-0 text-xl placeholder:text-gray-500 focus-visible:ring-0"
+          className="bg-transparent border-b rounded-none px-0 text-xl placeholder:text-gray-500 focus-visible:ring-0"
         />
       </div>
 
@@ -224,8 +223,8 @@ const CreateRoutine = () => {
       <div className="flex-1 p-4 space-y-4 overflow-y-auto">
         {routine.exercises.length === 0 ? (
           <div className="flex flex-col items-center justify-center space-y-6 py-12">
-            <Dumbbell className="h-12 w-12 text-gray-500" strokeWidth={1.5} />
-            <p className="text-gray-400 text-center">
+            <Dumbbell className="h-12 w-12 text-muted-foreground" strokeWidth={1.5} />
+            <p className="text-muted-foreground text-center">
               Empieza agregando un ejercicio a tu rutina
             </p>
           </div>
@@ -236,9 +235,9 @@ const CreateRoutine = () => {
               if (!exerciseDetails) return null;
 
               return (
-                <div key={exercise.id} className="bg-gray-900 rounded-lg overflow-hidden">
-                  <div className="flex items-center p-4 border-b border-gray-800">
-                    <div className="h-12 w-12 rounded-full bg-gray-800 flex-shrink-0 overflow-hidden mr-3">
+                <div key={exercise.id} className="bg-card rounded-lg overflow-hidden shadow-sm">
+                  <div className="flex items-center p-4 border-b">
+                    <div className="h-12 w-12 rounded-full bg-muted flex-shrink-0 overflow-hidden mr-3">
                       {exerciseDetails.imageUrl ? (
                         <img 
                           src={exerciseDetails.imageUrl} 
@@ -246,32 +245,32 @@ const CreateRoutine = () => {
                           className="h-full w-full object-cover"
                         />
                       ) : (
-                        <div className="h-full w-full flex items-center justify-center bg-gray-700">
-                          <Dumbbell className="h-6 w-6 text-gray-500" />
+                        <div className="h-full w-full flex items-center justify-center bg-muted">
+                          <Dumbbell className="h-6 w-6 text-muted-foreground" />
                         </div>
                       )}
                     </div>
                     <div className="flex-1">
-                      <h3 className="text-lg text-blue-400 font-medium">{exerciseDetails.name}</h3>
-                      <p className="text-sm text-gray-400">{exerciseDetails.category}</p>
+                      <h3 className="text-lg text-primary font-medium">{exerciseDetails.name}</h3>
+                      <p className="text-sm text-muted-foreground">{exerciseDetails.category}</p>
                     </div>
                     <Button 
                       variant="ghost" 
                       size="icon" 
                       onClick={() => handleRemoveExercise(exercise.id)}
-                      className="text-gray-400 hover:text-white hover:bg-gray-800"
+                      className="text-muted-foreground hover:text-foreground hover:bg-muted"
                     >
                       <X className="h-5 w-5" />
                     </Button>
                   </div>
 
                   <div className="p-4">
-                    <div className="flex items-center text-blue-400 mb-2">
+                    <div className="flex items-center text-primary mb-2">
                       <Clock className="h-4 w-4 mr-2" />
                       Temporizador de descanso: APAGADO
                     </div>
 
-                    <div className="grid grid-cols-3 gap-4 font-medium text-gray-300 text-sm mb-2">
+                    <div className="grid grid-cols-3 gap-4 font-medium text-muted-foreground text-sm mb-2">
                       <div>SERIE</div>
                       <div>KG</div>
                       <div>REPS</div>
@@ -286,14 +285,14 @@ const CreateRoutine = () => {
                           type="number"
                           value={set.weight || ''}
                           onChange={(e) => handleUpdateSet(exercise.id, set.id, "weight", e.target.value)}
-                          className="bg-gray-800 border-none text-center"
+                          className="bg-muted border-none text-center"
                           placeholder="-"
                         />
                         <Input
                           type="number"
                           value={set.reps || ''}
                           onChange={(e) => handleUpdateSet(exercise.id, set.id, "reps", e.target.value)}
-                          className="bg-gray-800 border-none text-center"
+                          className="bg-muted border-none text-center"
                           placeholder="-"
                         />
                       </div>
@@ -301,7 +300,7 @@ const CreateRoutine = () => {
 
                     <Button 
                       variant="outline" 
-                      className="w-full mt-2 border-gray-700 text-gray-300"
+                      className="w-full mt-2"
                       onClick={() => handleAddSet(exercise.id)}
                     >
                       <Plus className="h-4 w-4 mr-2" />
@@ -315,7 +314,7 @@ const CreateRoutine = () => {
         )}
 
         <Button 
-          className="w-full bg-blue-500 hover:bg-blue-600 py-6 text-base"
+          className="w-full bg-primary hover:bg-primary/90 py-6 text-base"
           onClick={() => setShowExerciseDialog(true)}
         >
           <Plus className="h-5 w-5 mr-2" />
@@ -325,16 +324,19 @@ const CreateRoutine = () => {
 
       {/* Diálogo para añadir ejercicio */}
       <Dialog open={showExerciseDialog} onOpenChange={setShowExerciseDialog}>
-        <DialogContent className="sm:max-w-md bg-black text-white border-gray-800">
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="text-center">Agregar Ejercicio</DialogTitle>
+            <DialogDescription className="text-center">
+              Busca y selecciona ejercicios para añadir a tu rutina
+            </DialogDescription>
           </DialogHeader>
 
           <div className="relative mb-4">
-            <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+            <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Buscar ejercicio"
-              className="pl-9 bg-gray-900 border-gray-700"
+              className="pl-9"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -345,11 +347,7 @@ const CreateRoutine = () => {
               <Button
                 key={group}
                 variant={selectedMuscleGroup === group ? "default" : "outline"}
-                className={`flex-shrink-0 ${
-                  selectedMuscleGroup === group 
-                    ? "bg-blue-500 hover:bg-blue-600" 
-                    : "bg-gray-900 text-gray-300 border-gray-700 hover:bg-gray-800"
-                }`}
+                className={`flex-shrink-0`}
                 onClick={() => setSelectedMuscleGroup(group)}
               >
                 {group}
@@ -361,10 +359,10 @@ const CreateRoutine = () => {
             {filteredExercises.map((exercise) => (
               <div 
                 key={exercise.id}
-                className="flex items-center p-3 border border-gray-800 rounded-lg hover:bg-gray-900 cursor-pointer"
+                className="flex items-center p-3 border rounded-lg hover:bg-muted cursor-pointer"
                 onClick={() => handleAddExercise(exercise.id)}
               >
-                <div className="h-12 w-12 rounded-full bg-gray-800 overflow-hidden mr-3">
+                <div className="h-12 w-12 rounded-full bg-muted overflow-hidden mr-3">
                   {exercise.imageUrl ? (
                     <img 
                       src={exercise.imageUrl} 
@@ -372,20 +370,20 @@ const CreateRoutine = () => {
                       className="h-full w-full object-cover"
                     />
                   ) : (
-                    <div className="h-full w-full flex items-center justify-center bg-gray-700">
-                      <Dumbbell className="h-6 w-6 text-gray-500" />
+                    <div className="h-full w-full flex items-center justify-center bg-muted">
+                      <Dumbbell className="h-6 w-6 text-muted-foreground" />
                     </div>
                   )}
                 </div>
                 <div className="flex-1">
                   <h3 className="font-medium">{exercise.name}</h3>
-                  <p className="text-sm text-gray-400">{exercise.category}</p>
+                  <p className="text-sm text-muted-foreground">{exercise.category}</p>
                 </div>
               </div>
             ))}
 
             {filteredExercises.length === 0 && (
-              <div className="text-center py-8 text-gray-400">
+              <div className="text-center py-8 text-muted-foreground">
                 No se encontraron ejercicios
               </div>
             )}
