@@ -37,7 +37,7 @@ const Navbar = () => {
   }, [location.pathname]);
 
   const navLinksTrainer = [
-    { name: "Dashboard", path: "/", icon: <Home className="h-5 w-5" /> },
+    { name: "Inicio", path: "/", icon: <Home className="h-5 w-5" /> },
     { name: "Clientes", path: "/clients", icon: <Users className="h-5 w-5" /> },
     { 
       name: "Entrenamiento", 
@@ -55,7 +55,7 @@ const Navbar = () => {
   ];
 
   const navLinksClient = [
-    { name: "Dashboard", path: "/", icon: <Home className="h-5 w-5" /> },
+    { name: "Inicio", path: "/", icon: <Home className="h-5 w-5" /> },
     { name: "Mi Perfil", path: "/profile", icon: <User className="h-5 w-5" /> },
     { 
       name: "Mi Entrenamiento", 
