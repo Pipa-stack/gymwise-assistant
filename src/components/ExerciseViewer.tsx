@@ -6,8 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Play, ChevronRight, CheckCircle2, Dumbbell, Info } from "lucide-react";
+import { Play, ChevronRight, CheckCircle2, Dumbbell, Info, Weight, ArrowRight, BarChart } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { useNavigate } from "react-router-dom";
 
 interface ExerciseViewerProps {
   planId?: string;
@@ -15,29 +18,46 @@ interface ExerciseViewerProps {
 }
 
 const ExerciseViewer = ({ planId, clientId }: ExerciseViewerProps) => {
-  const { trainingPlans, exercises, getExerciseById } = useAppContext();
+  const navigate = useNavigate();
+  const { 
+    trainingPlans, 
+    exercises, 
+    getExerciseById, 
+    mode,
+    clients,
+    addWeightHistory 
+  } = useAppContext();
+  
   const [selectedWorkout, setSelectedWorkout] = useState<string | null>(null);
   const [selectedExercise, setSelectedExercise] = useState<string | null>(null);
   const [completion, setCompletion] = useState<Record<string, number>>({});
+  const [showWeightDialog, setShowWeightDialog] = useState(false);
+  const [currentExerciseId, setCurrentExerciseId] = useState<string | null>(null);
+  const [weight, setWeight] = useState('');
+  const [reps, setReps] = useState('');
+  const [notes, setNotes] = useState('');
 
-  // Obtener el plan de entrenamiento
+  // Get current client if in client mode
+  const currentClientId = clientId || (mode === "client" ? clients[0]?.id : undefined);
+
+  // Get the training plan
   const plan = trainingPlans.find(p => 
-    p.id === planId || (clientId && p.clientId === clientId)
+    p.id === planId || (currentClientId && p.clientId === currentClientId)
   );
 
-  // Obtener los ejercicios del workout seleccionado
+  // Get exercises for the selected workout
   const workoutExercises = plan && selectedWorkout ? 
     plan.workouts.find(w => w.id === selectedWorkout)?.exercises || [] : [];
 
-  // Seleccionar el primer workout si no hay ninguno seleccionado
+  // Select first workout if none selected
   if (plan && plan.workouts.length > 0 && !selectedWorkout) {
     setSelectedWorkout(plan.workouts[0].id);
   }
 
-  // Obtener el ejercicio seleccionado
+  // Get selected exercise details
   const exercise = selectedExercise ? getExerciseById(selectedExercise) : null;
 
-  // Función para obtener el ID de video de YouTube
+  // Function to extract YouTube video ID
   const getYouTubeVideoId = (url?: string) => {
     if (!url) return null;
     const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
@@ -45,13 +65,48 @@ const ExerciseViewer = ({ planId, clientId }: ExerciseViewerProps) => {
     return (match && match[2].length === 11) ? match[2] : null;
   };
 
-  // Función para marcar ejercicio como completado
+  // Mark exercise as completed
   const markAsCompleted = (exerciseId: string, workoutId: string) => {
     const key = `${workoutId}-${exerciseId}`;
     setCompletion(prev => ({
       ...prev,
       [key]: 100
     }));
+  };
+
+  // Open weight tracking dialog
+  const openWeightDialog = (exerciseId: string) => {
+    setCurrentExerciseId(exerciseId);
+    setWeight('');
+    setReps('');
+    setNotes('');
+    setShowWeightDialog(true);
+  };
+
+  // Handle weight submission
+  const handleSubmitWeight = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    const weightNum = parseFloat(weight);
+    const repsNum = parseInt(reps);
+    
+    if (isNaN(weightNum) || isNaN(repsNum) || !currentExerciseId || !currentClientId) return;
+    
+    addWeightHistory(currentClientId, currentExerciseId, weightNum, repsNum, notes);
+    setShowWeightDialog(false);
+    
+    // Mark as completed
+    if (selectedWorkout) {
+      markAsCompleted(currentExerciseId, selectedWorkout);
+    }
+  };
+
+  // Navigate to see weight progress
+  const viewWeightProgress = () => {
+    const exerciseSection = document.getElementById("exercise-progress");
+    if (exerciseSection) {
+      exerciseSection.scrollIntoView({ behavior: 'smooth' });
+    }
   };
 
   if (!plan) {
@@ -89,15 +144,17 @@ const ExerciseViewer = ({ planId, clientId }: ExerciseViewerProps) => {
         </CardHeader>
         <CardContent>
           <div className="grid gap-4">
-            <div className="flex overflow-x-auto py-2 -mx-1 px-1 snap-x space-x-2">
+            <div className="flex overflow-x-auto py-2 -mx-1 px-1 snap-x space-x-2 scrollbar-hide">
               {plan.workouts.map(workout => (
                 <div 
                   key={workout.id}
                   className={cn(
                     "snap-start shrink-0 rounded-lg border p-3 cursor-pointer transition-colors",
-                    selectedWorkout === workout.id ? "bg-primary/10 border-primary" : "hover:bg-accent"
+                    selectedWorkout === workout.id 
+                      ? "bg-primary/10 border-primary" 
+                      : "hover:bg-accent",
+                    "min-w-[180px]"
                   )}
-                  style={{ width: "180px" }}
                   onClick={() => setSelectedWorkout(workout.id)}
                 >
                   <div className="font-medium mb-1">Día {workout.day}</div>
@@ -120,11 +177,11 @@ const ExerciseViewer = ({ planId, clientId }: ExerciseViewerProps) => {
                 return (
                   <div 
                     key={workoutExercise.exerciseId}
-                    className="border rounded-lg overflow-hidden"
+                    className="border rounded-lg overflow-hidden hover:shadow-md transition-all"
                   >
-                    <div className="p-4 flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="bg-secondary rounded-md w-12 h-12 flex items-center justify-center">
+                    <div className="p-4 flex flex-wrap md:flex-nowrap items-center justify-between gap-3">
+                      <div className="flex items-center gap-3 flex-1">
+                        <div className="bg-secondary rounded-md w-12 h-12 flex items-center justify-center shrink-0">
                           <Dumbbell className="h-6 w-6 text-primary" />
                         </div>
                         <div>
@@ -134,17 +191,26 @@ const ExerciseViewer = ({ planId, clientId }: ExerciseViewerProps) => {
                           </div>
                         </div>
                       </div>
-                      <div className="flex items-center">
+                      <div className="flex items-center gap-2 w-full md:w-auto mt-2 md:mt-0">
                         {completionValue === 100 ? (
-                          <CheckCircle2 className="h-5 w-5 text-green-500 mr-2" />
-                        ) : (
                           <Button 
-                            variant="ghost" 
+                            variant="outline" 
                             size="sm"
-                            onClick={() => markAsCompleted(workoutExercise.exerciseId, selectedWorkout || "")}
+                            className="text-success border-success bg-success/10"
+                            onClick={() => viewWeightProgress()}
                           >
                             <CheckCircle2 className="h-4 w-4 mr-1" />
-                            Completar
+                            Completado
+                          </Button>
+                        ) : (
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => openWeightDialog(workoutExercise.exerciseId)}
+                            className="flex-1 md:flex-initial"
+                          >
+                            <Weight className="h-4 w-4 mr-1" />
+                            Registrar peso
                           </Button>
                         )}
                         <Button
@@ -168,17 +234,24 @@ const ExerciseViewer = ({ planId, clientId }: ExerciseViewerProps) => {
                 );
               })}
             </div>
+            {workoutExercises.length > 0 && (
+              <div className="flex justify-end mt-4">
+                <Button 
+                  onClick={viewWeightProgress}
+                  variant="default"
+                  className="gap-2"
+                >
+                  <BarChart className="h-4 w-4" />
+                  Ver progreso de pesos
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
           </div>
         </CardContent>
-        <CardFooter className="flex justify-between">
-          <Button variant="outline">Descargar Plan</Button>
-          <Button>
-            <CheckCircle2 className="h-4 w-4 mr-2" />
-            <span>Completar Entrenamiento</span>
-          </Button>
-        </CardFooter>
       </Card>
 
+      {/* Exercise Info Dialog */}
       <Dialog
         open={!!selectedExercise}
         onOpenChange={(open) => {
@@ -226,6 +299,69 @@ const ExerciseViewer = ({ planId, clientId }: ExerciseViewerProps) => {
               </div>
             </>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Weight Recording Dialog */}
+      <Dialog
+        open={showWeightDialog}
+        onOpenChange={setShowWeightDialog}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Registrar Peso</DialogTitle>
+            <DialogDescription>
+              Introduce el peso que has levantado y el número de repeticiones realizadas.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <form onSubmit={handleSubmitWeight} className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Peso (kg)</label>
+                <Input
+                  type="number"
+                  value={weight}
+                  onChange={(e) => setWeight(e.target.value)}
+                  placeholder="Ej: 50"
+                  step="0.5"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Repeticiones</label>
+                <Input
+                  type="number"
+                  value={reps}
+                  onChange={(e) => setReps(e.target.value)}
+                  placeholder="Ej: 12"
+                  required
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Notas (opcional)</label>
+              <Textarea
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="Añade notas sobre el ejercicio..."
+                className="resize-none"
+                rows={2}
+              />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => setShowWeightDialog(false)}
+              >
+                Cancelar
+              </Button>
+              <Button type="submit">
+                Guardar
+              </Button>
+            </div>
+          </form>
         </DialogContent>
       </Dialog>
     </>
