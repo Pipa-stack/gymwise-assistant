@@ -465,8 +465,10 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       reps: 0
     };
     
-    setCustomRoutines(prev => 
-      prev.map(routine => {
+    console.log("Adding exercise to routine:", routineId, exerciseId);
+    
+    setCustomRoutines(prev => {
+      const updatedRoutines = prev.map(routine => {
         if (routine.id === routineId) {
           return {
             ...routine,
@@ -481,8 +483,11 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
           };
         }
         return routine;
-      })
-    );
+      });
+      
+      console.log("Updated routines:", updatedRoutines);
+      return updatedRoutines;
+    });
     
     toast({
       title: "Ejercicio añadido",

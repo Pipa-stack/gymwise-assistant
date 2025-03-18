@@ -63,6 +63,16 @@ const CreateRoutine = () => {
     }
   }, [routineTitle, routine, updateCustomRoutine]);
 
+  // Re-obtener la rutina actualizada cuando cambia customRoutines
+  useEffect(() => {
+    if (routine) {
+      const updatedRoutine = customRoutines.find(r => r.id === routine.id);
+      if (updatedRoutine) {
+        setRoutine(updatedRoutine);
+      }
+    }
+  }, [customRoutines, routine]);
+
   // Filtrar ejercicios para el diálogo
   const filteredExercises = exercises.filter(exercise => {
     const matchesSearch = exercise.name.toLowerCase().includes(searchQuery.toLowerCase());
@@ -99,8 +109,12 @@ const CreateRoutine = () => {
   const handleAddExercise = (exerciseId: string) => {
     if (!routine) return;
     
-    // Importante: Agregar el ejercicio a la rutina
+    console.log("Añadiendo ejercicio:", exerciseId);
+    
+    // Añadir el ejercicio a la rutina
     addExerciseToRoutine(routine.id, exerciseId);
+    
+    // Cerrar el diálogo
     setShowExerciseDialog(false);
     
     // Obtener el nombre del ejercicio para el toast
@@ -132,10 +146,10 @@ const CreateRoutine = () => {
   ) => {
     if (!routine) return;
     
-    const exercise = routine.exercises.find(e => e.id === exerciseId);
-    if (!exercise) return;
+    const exerciseObj = routine.exercises.find(e => e.id === exerciseId);
+    if (!exerciseObj) return;
     
-    const set = exercise.sets.find(s => s.id === setId);
+    const set = exerciseObj.sets.find(s => s.id === setId);
     if (!set) return;
     
     const numValue = parseInt(value, 10) || 0;
@@ -234,12 +248,12 @@ const CreateRoutine = () => {
           </div>
         ) : (
           <div className="space-y-6">
-            {routine.exercises.map((exercise) => {
-              const exerciseDetails = getExerciseById(exercise.exerciseId);
+            {routine.exercises.map((routineExercise) => {
+              const exerciseDetails = getExerciseById(routineExercise.exerciseId);
               if (!exerciseDetails) return null;
 
               return (
-                <div key={exercise.id} className="bg-card rounded-lg overflow-hidden shadow-sm">
+                <div key={routineExercise.id} className="bg-card rounded-lg overflow-hidden shadow-sm">
                   <div className="flex items-center p-4 border-b">
                     <div className="h-12 w-12 rounded-full bg-muted flex-shrink-0 overflow-hidden mr-3">
                       {exerciseDetails.imageUrl ? (
@@ -261,7 +275,7 @@ const CreateRoutine = () => {
                     <Button 
                       variant="ghost" 
                       size="icon" 
-                      onClick={() => handleRemoveExercise(exercise.id)}
+                      onClick={() => handleRemoveExercise(routineExercise.id)}
                       className="text-muted-foreground hover:text-foreground hover:bg-muted"
                     >
                       <X className="h-5 w-5" />
@@ -280,7 +294,7 @@ const CreateRoutine = () => {
                       <div>REPS</div>
                     </div>
 
-                    {exercise.sets.map((set) => (
+                    {routineExercise.sets.map((set) => (
                       <div key={set.id} className="grid grid-cols-3 gap-4 mb-2">
                         <div className="flex items-center">
                           <span className="text-xl font-bold">{set.setNumber}</span>
@@ -288,14 +302,14 @@ const CreateRoutine = () => {
                         <Input
                           type="number"
                           value={set.weight || ''}
-                          onChange={(e) => handleUpdateSet(exercise.id, set.id, "weight", e.target.value)}
+                          onChange={(e) => handleUpdateSet(routineExercise.id, set.id, "weight", e.target.value)}
                           className="bg-muted border-none text-center"
                           placeholder="-"
                         />
                         <Input
                           type="number"
                           value={set.reps || ''}
-                          onChange={(e) => handleUpdateSet(exercise.id, set.id, "reps", e.target.value)}
+                          onChange={(e) => handleUpdateSet(routineExercise.id, set.id, "reps", e.target.value)}
                           className="bg-muted border-none text-center"
                           placeholder="-"
                         />
@@ -305,7 +319,7 @@ const CreateRoutine = () => {
                     <Button 
                       variant="outline" 
                       className="w-full mt-2"
-                      onClick={() => handleAddSet(exercise.id)}
+                      onClick={() => handleAddSet(routineExercise.id)}
                     >
                       <Plus className="h-4 w-4 mr-2" />
                       Agregar Serie
