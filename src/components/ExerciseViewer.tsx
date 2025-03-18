@@ -6,11 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Play, ChevronRight, CheckCircle2, Dumbbell, Info, Weight, ArrowRight, BarChart } from "lucide-react";
+import { Play, ChevronRight, CheckCircle2, Dumbbell, Info, Weight, ArrowRight, BarChart, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useNavigate } from "react-router-dom";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 interface ExerciseViewerProps {
   planId?: string;
@@ -28,7 +29,6 @@ const ExerciseViewer = ({ planId, clientId }: ExerciseViewerProps) => {
     addWeightHistory 
   } = useAppContext();
   
-  const [selectedWorkout, setSelectedWorkout] = useState<string | null>(null);
   const [selectedExercise, setSelectedExercise] = useState<string | null>(null);
   const [completion, setCompletion] = useState<Record<string, number>>({});
   const [showWeightDialog, setShowWeightDialog] = useState(false);
@@ -36,6 +36,7 @@ const ExerciseViewer = ({ planId, clientId }: ExerciseViewerProps) => {
   const [weight, setWeight] = useState('');
   const [reps, setReps] = useState('');
   const [notes, setNotes] = useState('');
+  const [openWorkouts, setOpenWorkouts] = useState<Record<string, boolean>>({});
 
   // Get current client if in client mode
   const currentClientId = clientId || (mode === "client" ? clients[0]?.id : undefined);
@@ -45,16 +46,20 @@ const ExerciseViewer = ({ planId, clientId }: ExerciseViewerProps) => {
     p.id === planId || (currentClientId && p.clientId === currentClientId)
   );
 
-  // Get exercises for the selected workout
-  const workoutExercises = plan && selectedWorkout ? 
-    plan.workouts.find(w => w.id === selectedWorkout)?.exercises || [] : [];
+  // Toggle workout visibility
+  const toggleWorkout = (workoutId: string) => {
+    setOpenWorkouts(prev => ({
+      ...prev,
+      [workoutId]: !prev[workoutId]
+    }));
+  };
 
-  // Select first workout if none selected and if plan exists
+  // If no workouts are open, open the first one by default
   useEffect(() => {
-    if (plan && plan.workouts.length > 0 && !selectedWorkout) {
-      setSelectedWorkout(plan.workouts[0].id);
+    if (plan && plan.workouts.length > 0 && Object.keys(openWorkouts).length === 0) {
+      setOpenWorkouts({ [plan.workouts[0].id]: true });
     }
-  }, [plan, selectedWorkout]);
+  }, [plan, openWorkouts]);
 
   // Get selected exercise details
   const exercise = selectedExercise ? getExerciseById(selectedExercise) : null;
@@ -98,8 +103,11 @@ const ExerciseViewer = ({ planId, clientId }: ExerciseViewerProps) => {
     setShowWeightDialog(false);
     
     // Mark as completed
-    if (selectedWorkout) {
-      markAsCompleted(currentExerciseId, selectedWorkout);
+    const workout = plan?.workouts.find(w => 
+      w.exercises.some(e => e.exerciseId === currentExerciseId)
+    );
+    if (workout) {
+      markAsCompleted(currentExerciseId, workout.id);
     }
   };
 
@@ -146,116 +154,148 @@ const ExerciseViewer = ({ planId, clientId }: ExerciseViewerProps) => {
         </CardHeader>
         <CardContent>
           <div className="grid gap-4">
-            <div className="flex overflow-x-auto py-2 -mx-1 px-1 snap-x space-x-2 scrollbar-hide">
-              {plan.workouts.map(workout => (
-                <div 
-                  key={workout.id}
-                  className={cn(
-                    "snap-start shrink-0 rounded-lg border p-3 cursor-pointer transition-colors",
-                    selectedWorkout === workout.id 
-                      ? "bg-primary/10 border-primary" 
-                      : "hover:bg-accent",
-                    "min-w-[180px]"
-                  )}
-                  onClick={() => setSelectedWorkout(workout.id)}
-                >
-                  <div className="font-medium mb-1">Día {workout.day}</div>
-                  <div className="text-sm text-muted-foreground">{workout.name}</div>
-                  <div className="text-xs mt-2">
-                    {workout.exercises.length} ejercicios
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="space-y-3 mt-2">
-              {workoutExercises.length > 0 ? (
-                workoutExercises.map(workoutExercise => {
-                  const exercise = getExerciseById(workoutExercise.exerciseId);
-                  if (!exercise) return null;
-
-                  const key = `${selectedWorkout}-${workoutExercise.exerciseId}`;
-                  const completionValue = completion[key] || 0;
-                  
-                  return (
-                    <div 
-                      key={workoutExercise.exerciseId}
-                      className="border rounded-lg overflow-hidden hover:shadow-md transition-all"
-                    >
-                      <div className="p-4 flex flex-wrap md:flex-nowrap items-center justify-between gap-3">
-                        <div className="flex items-center gap-3 flex-1">
-                          <div className="bg-secondary rounded-md w-12 h-12 flex items-center justify-center shrink-0">
-                            <Dumbbell className="h-6 w-6 text-primary" />
+            {plan.workouts.length > 0 ? (
+              <div className="space-y-4">
+                {plan.workouts.map((workout) => (
+                  <Collapsible
+                    key={workout.id}
+                    open={openWorkouts[workout.id]}
+                    onOpenChange={() => toggleWorkout(workout.id)}
+                    className="border rounded-lg overflow-hidden"
+                  >
+                    <div className="bg-muted/30 p-4">
+                      <CollapsibleTrigger className="flex items-center justify-between w-full text-left">
+                        <div className="flex items-center">
+                          <div className="bg-secondary rounded-md w-10 h-10 flex items-center justify-center shrink-0 mr-3">
+                            <Dumbbell className="h-5 w-5 text-primary" />
                           </div>
                           <div>
-                            <div className="font-medium">{exercise.name}</div>
-                            <div className="text-sm text-muted-foreground">
-                              {workoutExercise.sets} series × {workoutExercise.reps} repeticiones
-                            </div>
+                            <h3 className="font-medium">Día {workout.day}</h3>
+                            <p className="text-sm text-muted-foreground">{workout.name}</p>
                           </div>
                         </div>
-                        <div className="flex items-center gap-2 w-full md:w-auto mt-2 md:mt-0">
-                          {completionValue === 100 ? (
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              className="text-success border-success bg-success/10"
-                              onClick={() => viewWeightProgress()}
-                            >
-                              <CheckCircle2 className="h-4 w-4 mr-1" />
-                              Completado
-                            </Button>
-                          ) : (
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              onClick={() => openWeightDialog(workoutExercise.exerciseId)}
-                              className="flex-1 md:flex-initial"
-                            >
-                              <Weight className="h-4 w-4 mr-1" />
-                              Registrar peso
-                            </Button>
-                          )}
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => setSelectedExercise(exercise.id)}
-                          >
-                            <Info className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                      {workoutExercise.notes && (
-                        <div className="px-4 pb-3 pt-0 text-sm text-muted-foreground">
-                          Nota: {workoutExercise.notes}
-                        </div>
-                      )}
-                      {completionValue > 0 && (
-                        <Progress value={completionValue} className="h-1 rounded-none" />
-                      )}
+                        <ChevronDown className={cn(
+                          "h-5 w-5 transition-transform duration-200",
+                          openWorkouts[workout.id] ? "transform rotate-180" : ""
+                        )} />
+                      </CollapsibleTrigger>
                     </div>
-                  );
-                })
-              ) : (
-                <div className="text-center py-8 border rounded-lg">
-                  <Dumbbell className="h-8 w-8 mx-auto text-muted-foreground opacity-40 mb-2" />
-                  <p className="text-muted-foreground">
-                    No hay ejercicios asignados para este día. El entrenador debe añadirlos.
-                  </p>
+                    
+                    <CollapsibleContent>
+                      <div className="divide-y">
+                        {workout.exercises.length > 0 ? (
+                          workout.exercises.map(workoutExercise => {
+                            const exercise = getExerciseById(workoutExercise.exerciseId);
+                            if (!exercise) return null;
+                            
+                            const key = `${workout.id}-${workoutExercise.exerciseId}`;
+                            const completionValue = completion[key] || 0;
+                            
+                            // Find weight history for this exercise
+                            const client = clients.find(c => c.id === currentClientId);
+                            const exerciseHistory = client?.weightHistory?.filter(
+                              h => h.exerciseId === workoutExercise.exerciseId
+                            );
+                            
+                            // Get the latest weight record if it exists
+                            const latestWeight = exerciseHistory?.length 
+                              ? exerciseHistory.sort((a, b) => 
+                                  new Date(b.date).getTime() - new Date(a.date).getTime()
+                                )[0]
+                              : null;
+                            
+                            return (
+                              <div 
+                                key={workoutExercise.exerciseId}
+                                className="p-4 relative"
+                              >
+                                <div className="flex flex-wrap md:flex-nowrap items-center justify-between gap-3">
+                                  <div className="flex items-center gap-3 flex-1">
+                                    <div>
+                                      <div className="font-medium">{exercise.name}</div>
+                                      <div className="text-sm text-muted-foreground">
+                                        {workoutExercise.sets} series × {workoutExercise.reps} repeticiones
+                                      </div>
+                                      {latestWeight && (
+                                        <div className="mt-1 text-sm font-medium text-primary">
+                                          Último peso: {latestWeight.weight} kg × {latestWeight.reps} reps
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center gap-2 w-full md:w-auto mt-2 md:mt-0">
+                                    {completionValue === 100 ? (
+                                      <Button 
+                                        variant="outline" 
+                                        size="sm"
+                                        className="text-success border-success bg-success/10"
+                                        onClick={() => viewWeightProgress()}
+                                      >
+                                        <CheckCircle2 className="h-4 w-4 mr-1" />
+                                        Completado
+                                      </Button>
+                                    ) : (
+                                      <Button 
+                                        variant="outline" 
+                                        size="sm"
+                                        onClick={() => openWeightDialog(workoutExercise.exerciseId)}
+                                        className="flex-1 md:flex-initial"
+                                      >
+                                        <Weight className="h-4 w-4 mr-1" />
+                                        Registrar peso
+                                      </Button>
+                                    )}
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      onClick={() => setSelectedExercise(exercise.id)}
+                                    >
+                                      <Info className="h-4 w-4" />
+                                    </Button>
+                                  </div>
+                                </div>
+                                {workoutExercise.notes && (
+                                  <div className="pt-2 text-sm text-muted-foreground">
+                                    Nota: {workoutExercise.notes}
+                                  </div>
+                                )}
+                                {completionValue > 0 && (
+                                  <Progress value={completionValue} className="h-1 absolute bottom-0 left-0 right-0 rounded-none" />
+                                )}
+                              </div>
+                            );
+                          })
+                        ) : (
+                          <div className="text-center py-6 px-4">
+                            <Dumbbell className="h-6 w-6 mx-auto text-muted-foreground opacity-40 mb-2" />
+                            <p className="text-muted-foreground">
+                              No hay ejercicios asignados para este día. El entrenador debe añadirlos.
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </CollapsibleContent>
+                  </Collapsible>
+                ))}
+                
+                <div className="flex justify-end mt-4">
+                  <Button 
+                    onClick={viewWeightProgress}
+                    variant="default"
+                    className="gap-2"
+                  >
+                    <BarChart className="h-4 w-4" />
+                    Ver progreso de pesos
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
                 </div>
-              )}
-            </div>
-            {workoutExercises.length > 0 && (
-              <div className="flex justify-end mt-4">
-                <Button 
-                  onClick={viewWeightProgress}
-                  variant="default"
-                  className="gap-2"
-                >
-                  <BarChart className="h-4 w-4" />
-                  Ver progreso de pesos
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
+              </div>
+            ) : (
+              <div className="text-center py-8 border rounded-lg">
+                <Dumbbell className="h-8 w-8 mx-auto text-muted-foreground opacity-40 mb-2" />
+                <p className="text-muted-foreground">
+                  No hay días de entrenamiento asignados en este plan.
+                </p>
               </div>
             )}
           </div>
