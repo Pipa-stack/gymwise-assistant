@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -94,6 +93,18 @@
 
   .chart-container {
     @apply rounded-lg p-4 bg-white/50 backdrop-blur-sm shadow-sm hover:shadow-md transition-all duration-300;
+  }
+  
+  .exercise-card {
+    @apply p-3 rounded-lg transition-all duration-200;
+  }
+  
+  .exercise-card:hover {
+    @apply bg-accent/40;
+  }
+  
+  .workout-day-header {
+    @apply flex items-center justify-between w-full p-3 hover:bg-accent/30 transition-all duration-200 cursor-pointer;
   }
 }
 
