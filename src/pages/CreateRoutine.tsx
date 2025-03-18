@@ -148,7 +148,11 @@ const CreateRoutine = () => {
   const handleRemoveExercise = (exerciseId: string) => {
     if (!routine) return;
     
-    const exerciseName = routine.exercises.find(e => e.id === exerciseId)?.exerciseDetails?.name || "Ejercicio";
+    // Fixed: Use getExerciseById to get exercise name instead of accessing nonexistent property
+    const exercise = routine.exercises.find(e => e.id === exerciseId);
+    if (!exercise) return;
+    
+    const exerciseName = getExerciseById(exercise.exerciseId)?.name || "Ejercicio";
     
     deleteExerciseFromRoutine(routine.id, exerciseId);
     
