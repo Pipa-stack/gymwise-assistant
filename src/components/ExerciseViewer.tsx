@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAppContext } from "@/context/AppContext";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -49,10 +49,12 @@ const ExerciseViewer = ({ planId, clientId }: ExerciseViewerProps) => {
   const workoutExercises = plan && selectedWorkout ? 
     plan.workouts.find(w => w.id === selectedWorkout)?.exercises || [] : [];
 
-  // Select first workout if none selected
-  if (plan && plan.workouts.length > 0 && !selectedWorkout) {
-    setSelectedWorkout(plan.workouts[0].id);
-  }
+  // Select first workout if none selected and if plan exists
+  useEffect(() => {
+    if (plan && plan.workouts.length > 0 && !selectedWorkout) {
+      setSelectedWorkout(plan.workouts[0].id);
+    }
+  }, [plan, selectedWorkout]);
 
   // Get selected exercise details
   const exercise = selectedExercise ? getExerciseById(selectedExercise) : null;
@@ -167,72 +169,81 @@ const ExerciseViewer = ({ planId, clientId }: ExerciseViewerProps) => {
             </div>
 
             <div className="space-y-3 mt-2">
-              {workoutExercises.map(workoutExercise => {
-                const exercise = getExerciseById(workoutExercise.exerciseId);
-                if (!exercise) return null;
+              {workoutExercises.length > 0 ? (
+                workoutExercises.map(workoutExercise => {
+                  const exercise = getExerciseById(workoutExercise.exerciseId);
+                  if (!exercise) return null;
 
-                const key = `${selectedWorkout}-${workoutExercise.exerciseId}`;
-                const completionValue = completion[key] || 0;
-                
-                return (
-                  <div 
-                    key={workoutExercise.exerciseId}
-                    className="border rounded-lg overflow-hidden hover:shadow-md transition-all"
-                  >
-                    <div className="p-4 flex flex-wrap md:flex-nowrap items-center justify-between gap-3">
-                      <div className="flex items-center gap-3 flex-1">
-                        <div className="bg-secondary rounded-md w-12 h-12 flex items-center justify-center shrink-0">
-                          <Dumbbell className="h-6 w-6 text-primary" />
-                        </div>
-                        <div>
-                          <div className="font-medium">{exercise.name}</div>
-                          <div className="text-sm text-muted-foreground">
-                            {workoutExercise.sets} series × {workoutExercise.reps} repeticiones
+                  const key = `${selectedWorkout}-${workoutExercise.exerciseId}`;
+                  const completionValue = completion[key] || 0;
+                  
+                  return (
+                    <div 
+                      key={workoutExercise.exerciseId}
+                      className="border rounded-lg overflow-hidden hover:shadow-md transition-all"
+                    >
+                      <div className="p-4 flex flex-wrap md:flex-nowrap items-center justify-between gap-3">
+                        <div className="flex items-center gap-3 flex-1">
+                          <div className="bg-secondary rounded-md w-12 h-12 flex items-center justify-center shrink-0">
+                            <Dumbbell className="h-6 w-6 text-primary" />
+                          </div>
+                          <div>
+                            <div className="font-medium">{exercise.name}</div>
+                            <div className="text-sm text-muted-foreground">
+                              {workoutExercise.sets} series × {workoutExercise.reps} repeticiones
+                            </div>
                           </div>
                         </div>
-                      </div>
-                      <div className="flex items-center gap-2 w-full md:w-auto mt-2 md:mt-0">
-                        {completionValue === 100 ? (
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            className="text-success border-success bg-success/10"
-                            onClick={() => viewWeightProgress()}
+                        <div className="flex items-center gap-2 w-full md:w-auto mt-2 md:mt-0">
+                          {completionValue === 100 ? (
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              className="text-success border-success bg-success/10"
+                              onClick={() => viewWeightProgress()}
+                            >
+                              <CheckCircle2 className="h-4 w-4 mr-1" />
+                              Completado
+                            </Button>
+                          ) : (
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => openWeightDialog(workoutExercise.exerciseId)}
+                              className="flex-1 md:flex-initial"
+                            >
+                              <Weight className="h-4 w-4 mr-1" />
+                              Registrar peso
+                            </Button>
+                          )}
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => setSelectedExercise(exercise.id)}
                           >
-                            <CheckCircle2 className="h-4 w-4 mr-1" />
-                            Completado
+                            <Info className="h-4 w-4" />
                           </Button>
-                        ) : (
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => openWeightDialog(workoutExercise.exerciseId)}
-                            className="flex-1 md:flex-initial"
-                          >
-                            <Weight className="h-4 w-4 mr-1" />
-                            Registrar peso
-                          </Button>
-                        )}
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => setSelectedExercise(exercise.id)}
-                        >
-                          <Info className="h-4 w-4" />
-                        </Button>
+                        </div>
                       </div>
+                      {workoutExercise.notes && (
+                        <div className="px-4 pb-3 pt-0 text-sm text-muted-foreground">
+                          Nota: {workoutExercise.notes}
+                        </div>
+                      )}
+                      {completionValue > 0 && (
+                        <Progress value={completionValue} className="h-1 rounded-none" />
+                      )}
                     </div>
-                    {workoutExercise.notes && (
-                      <div className="px-4 pb-3 pt-0 text-sm text-muted-foreground">
-                        Nota: {workoutExercise.notes}
-                      </div>
-                    )}
-                    {completionValue > 0 && (
-                      <Progress value={completionValue} className="h-1 rounded-none" />
-                    )}
-                  </div>
-                );
-              })}
+                  );
+                })
+              ) : (
+                <div className="text-center py-8 border rounded-lg">
+                  <Dumbbell className="h-8 w-8 mx-auto text-muted-foreground opacity-40 mb-2" />
+                  <p className="text-muted-foreground">
+                    No hay ejercicios asignados para este día. El entrenador debe añadirlos.
+                  </p>
+                </div>
+              )}
             </div>
             {workoutExercises.length > 0 && (
               <div className="flex justify-end mt-4">
