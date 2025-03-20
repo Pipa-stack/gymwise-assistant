@@ -14,7 +14,6 @@ import CreateRoutine from "./pages/CreateRoutine";
 import Exercises from "./pages/Exercises";
 import ExerciseLibrary from "./pages/ExerciseLibrary";
 import Calendar from "./pages/Calendar";
-import Chat from "./pages/Chat";
 import Stats from "./pages/Stats";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
@@ -39,7 +38,6 @@ const App = () => (
               <Route path="/exercises" element={<Exercises />} />
               <Route path="/exercise-library" element={<ExerciseLibrary />} />
               <Route path="/calendar" element={<Calendar />} />
-              <Route path="/chat" element={<Chat />} />
               <Route path="/stats" element={<Stats />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="*" element={<NotFound />} />

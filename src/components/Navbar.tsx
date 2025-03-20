@@ -6,7 +6,6 @@ import {
   Users, 
   Dumbbell, 
   Calendar, 
-  MessageCircle, 
   Menu, 
   X,
   User,
@@ -50,8 +49,7 @@ const Navbar = () => {
       ]
     },
     { name: "Calendario", path: "/calendar", icon: <Calendar className="h-5 w-5" /> },
-    { name: "Métricas", path: "/stats", icon: <BarChart className="h-5 w-5" /> },
-    { name: "Chat", path: "/chat", icon: <MessageCircle className="h-5 w-5" /> }
+    { name: "Métricas", path: "/stats", icon: <BarChart className="h-5 w-5" /> }
   ];
 
   const navLinksClient = [
@@ -68,8 +66,7 @@ const Navbar = () => {
       ]
     },
     { name: "Calendario", path: "/calendar", icon: <Calendar className="h-5 w-5" /> },
-    { name: "Mi Progreso", path: "/stats", icon: <BarChart className="h-5 w-5" /> },
-    { name: "Chat", path: "/chat", icon: <MessageCircle className="h-5 w-5" /> }
+    { name: "Mi Progreso", path: "/stats", icon: <BarChart className="h-5 w-5" /> }
   ];
 
   const navLinks = mode === "trainer" ? navLinksTrainer : navLinksClient;
@@ -98,7 +95,6 @@ const Navbar = () => {
           </Link>
         </div>
 
-        {/* Desktop Navigation */}
         <div className="hidden md:flex md:items-center md:space-x-1">
           {navLinks.map((link) => (
             <div key={link.path} className="relative group">
@@ -139,7 +135,6 @@ const Navbar = () => {
           ))}
         </div>
 
-        {/* Mobile Menu Button */}
         <button
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           className="inline-flex items-center justify-center rounded-md p-2 text-foreground hover:bg-accent md:hidden"
@@ -152,7 +147,6 @@ const Navbar = () => {
         </button>
       </div>
 
-      {/* Mobile Navigation */}
       <div
         className={cn(
           "fixed inset-x-0 top-16 z-50 origin-top transform bg-background/95 backdrop-blur-md shadow-lg transition-all duration-300 ease-in-out md:hidden",
