@@ -41,7 +41,7 @@ const Layout = ({ children }: LayoutProps) => {
     <div className="flex min-h-screen flex-col bg-background">
       <Navbar />
       <main className={cn(
-        "flex-1 px-4 py-8 md:px-8 lg:px-12 transition-all duration-500 ease-out",
+        "flex-1 px-4 py-6 md:px-6 lg:px-8 transition-all duration-500 ease-out",
         isPageTransitioning ? "opacity-0 translate-y-6" : "opacity-100 translate-y-0"
       )}>
         <div className="mx-auto w-full max-w-7xl">
