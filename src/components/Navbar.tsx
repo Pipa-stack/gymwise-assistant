@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAppContext } from "@/context/AppContext";
@@ -10,6 +9,9 @@ import {
   Menu, 
   X,
   User,
+  Settings,
+  Landmark,
+  BookOpen,
   BarChart
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -36,7 +38,16 @@ const Navbar = () => {
   const navLinksTrainer = [
     { name: "Inicio", path: "/", icon: <Home className="h-5 w-5" /> },
     { name: "Clientes", path: "/clients", icon: <Users className="h-5 w-5" /> },
-    { name: "Ejercicios", path: "/exercises", icon: <Dumbbell className="h-5 w-5" /> },
+    { 
+      name: "Entrenamiento", 
+      path: "/training-plans", 
+      icon: <Dumbbell className="h-5 w-5" />,
+      subItems: [
+        { name: "Planes", path: "/training-plans" },
+        { name: "Ejercicios", path: "/exercises" },
+        { name: "Biblioteca", path: "/exercise-library" },
+      ]
+    },
     { name: "Calendario", path: "/calendar", icon: <Calendar className="h-5 w-5" /> },
     { name: "Métricas", path: "/stats", icon: <BarChart className="h-5 w-5" /> }
   ];
@@ -44,7 +55,16 @@ const Navbar = () => {
   const navLinksClient = [
     { name: "Inicio", path: "/", icon: <Home className="h-5 w-5" /> },
     { name: "Mi Perfil", path: "/profile", icon: <User className="h-5 w-5" /> },
-    { name: "Ejercicios", path: "/exercises", icon: <Dumbbell className="h-5 w-5" /> },
+    { 
+      name: "Mi Entrenamiento", 
+      path: "/training-plans", 
+      icon: <Dumbbell className="h-5 w-5" />,
+      subItems: [
+        { name: "Mi Plan", path: "/training-plans" },
+        { name: "Ejercicios", path: "/exercises" },
+        { name: "Biblioteca", path: "/exercise-library" },
+      ]
+    },
     { name: "Calendario", path: "/calendar", icon: <Calendar className="h-5 w-5" /> },
     { name: "Mi Progreso", path: "/stats", icon: <BarChart className="h-5 w-5" /> }
   ];
@@ -60,14 +80,14 @@ const Navbar = () => {
           : "bg-background/50"
       )}
     >
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
-        <div className="flex items-center">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 md:px-8">
+        <div className="flex items-center space-x-2">
           <Link to="/" className="flex items-center space-x-2">
             <div className="relative h-8 w-8 overflow-hidden rounded-full bg-primary text-primary-foreground">
-              <Dumbbell className="absolute inset-0 m-auto h-5 w-5" />
+              <Landmark className="absolute inset-0 m-auto h-5 w-5" />
             </div>
             <span className="hidden text-xl font-bold sm:inline-block">
-              GymWise
+              Templo
             </span>
             <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
               {mode === "trainer" ? "Entrenador" : "Cliente"}
@@ -77,19 +97,41 @@ const Navbar = () => {
 
         <div className="hidden md:flex md:items-center md:space-x-1">
           {navLinks.map((link) => (
-            <Link
-              key={link.path}
-              to={link.path}
-              className={cn(
-                "flex items-center space-x-1 rounded-md px-3 py-2 text-sm font-medium transition-all hover:bg-accent",
-                location.pathname === link.path
-                  ? "bg-accent text-foreground"
-                  : "text-muted-foreground"
+            <div key={link.path} className="relative group">
+              <Link
+                to={link.path}
+                className={cn(
+                  "flex items-center space-x-1 rounded-md px-3 py-2 text-sm font-medium transition-all hover:bg-accent",
+                  location.pathname === link.path
+                    ? "bg-accent text-foreground"
+                    : "text-muted-foreground"
+                )}
+              >
+                {link.icon}
+                <span>{link.name}</span>
+              </Link>
+              
+              {link.subItems && (
+                <div className="absolute left-0 mt-1 w-48 origin-top-right rounded-md bg-popover shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
+                  <div className="py-1">
+                    {link.subItems.map((subItem) => (
+                      <Link
+                        key={subItem.path}
+                        to={subItem.path}
+                        className={cn(
+                          "block px-4 py-2 text-sm hover:bg-accent",
+                          location.pathname === subItem.path
+                            ? "bg-accent/50 text-foreground"
+                            : "text-muted-foreground"
+                        )}
+                      >
+                        {subItem.name}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
               )}
-            >
-              {link.icon}
-              <span>{link.name}</span>
-            </Link>
+            </div>
           ))}
         </div>
 
@@ -115,19 +157,39 @@ const Navbar = () => {
       >
         <div className="space-y-1 p-4">
           {navLinks.map((link) => (
-            <Link
-              key={link.path}
-              to={link.path}
-              className={cn(
-                "flex items-center space-x-2 rounded-md px-4 py-3 text-sm font-medium transition-all",
-                location.pathname === link.path
-                  ? "bg-accent text-foreground"
-                  : "text-muted-foreground hover:bg-accent/50"
+            <div key={link.path}>
+              <Link
+                to={link.path}
+                className={cn(
+                  "flex items-center space-x-2 rounded-md px-4 py-3 text-sm font-medium transition-all",
+                  location.pathname === link.path
+                    ? "bg-accent text-foreground"
+                    : "text-muted-foreground hover:bg-accent/50"
+                )}
+              >
+                {link.icon}
+                <span>{link.name}</span>
+              </Link>
+              
+              {link.subItems && (
+                <div className="ml-4 mt-1 space-y-1">
+                  {link.subItems.map((subItem) => (
+                    <Link
+                      key={subItem.path}
+                      to={subItem.path}
+                      className={cn(
+                        "block rounded-md px-4 py-2 text-sm transition-all",
+                        location.pathname === subItem.path
+                          ? "bg-accent/50 text-foreground"
+                          : "text-muted-foreground hover:bg-accent/30"
+                      )}
+                    >
+                      {subItem.name}
+                    </Link>
+                  ))}
+                </div>
               )}
-            >
-              {link.icon}
-              <span>{link.name}</span>
-            </Link>
+            </div>
           ))}
         </div>
       </div>
