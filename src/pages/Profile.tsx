@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useAppContext } from "@/context/AppContext";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,11 +19,17 @@ import {
   Activity, 
   FileText, 
   BarChart2,
-  Award
+  Award,
+  Image,
+  Instagram,
+  Facebook,
+  Twitter
 } from "lucide-react";
 import ProgressChart from "@/components/ProgressChart";
 import { format } from "date-fns";
 import { useToast } from "@/components/ui/use-toast";
+import SocialMediaLinks from "@/components/social/SocialMediaLinks";
+import TrainingGallery from "@/components/social/TrainingGallery";
 
 const Profile = () => {
   const { clients, mode } = useAppContext();
@@ -40,7 +45,12 @@ const Profile = () => {
     email: clientData.email,
     phone: clientData.phone,
     goal: clientData.goal,
-    notes: "Me gustaría enfocarme en mejorar mi técnica de sentadilla."
+    notes: "Me gustaría enfocarme en mejorar mi técnica de sentadilla.",
+    socialLinks: {
+      instagram: "@fitness_user",
+      facebook: "fitnessuser",
+      twitter: "@fitness_user"
+    }
   });
 
   // Calculamos el progreso hacia la meta
@@ -50,6 +60,14 @@ const Profile = () => {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSocialInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ 
+      ...prev, 
+      socialLinks: { ...prev.socialLinks, [name]: value } 
+    }));
   };
 
   const handleSaveProfile = () => {
@@ -65,6 +83,14 @@ const Profile = () => {
   const daysTraining = Math.ceil(
     Math.abs(new Date().getTime() - new Date(clientData.startDate).getTime()) / (1000 * 60 * 60 * 24)
   );
+
+  // Sample training photos
+  const trainingPhotos = [
+    { id: "1", url: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?q=80&w=2070&auto=format&fit=crop", description: "Entrenamiento de piernas", date: "2023-11-20" },
+    { id: "2", url: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?q=80&w=2070&auto=format&fit=crop", description: "PR en press de banca", date: "2023-12-05" },
+    { id: "3", url: "https://images.unsplash.com/photo-1599058917212-d750089bc07e?q=80&w=2069&auto=format&fit=crop", description: "Entrenamiento de espalda", date: "2024-01-15" },
+    { id: "4", url: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=2070&auto=format&fit=crop", description: "Cardio matutino", date: "2024-02-10" },
+  ];
 
   return (
     <div className="space-y-6">
@@ -190,6 +216,12 @@ const Profile = () => {
                   </Badge>
                 </div>
               </div>
+
+              <SocialMediaLinks 
+                isEditing={isEditing}
+                socialLinks={formData.socialLinks}
+                onChange={handleSocialInputChange}
+              />
             </div>
           </CardContent>
         </Card>
@@ -211,6 +243,10 @@ const Profile = () => {
                   <TabsTrigger value="achievements" className="flex items-center gap-1">
                     <Award className="h-4 w-4" />
                     <span className="hidden sm:inline">Logros</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="gallery" className="flex items-center gap-1">
+                    <Image className="h-4 w-4" />
+                    <span className="hidden sm:inline">Galería</span>
                   </TabsTrigger>
                 </TabsList>
               </div>
@@ -352,6 +388,18 @@ const Profile = () => {
                   </div>
                 </div>
               </CardContent>
+            </TabsContent>
+
+            <TabsContent value="gallery">
+              <CardContent>
+                <TrainingGallery photos={trainingPhotos} />
+              </CardContent>
+              <CardFooter className="flex justify-end">
+                <Button size="sm">
+                  <Image className="h-4 w-4 mr-2" />
+                  Añadir nueva foto
+                </Button>
+              </CardFooter>
             </TabsContent>
           </Tabs>
         </Card>

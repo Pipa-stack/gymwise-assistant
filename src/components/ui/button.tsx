@@ -19,6 +19,9 @@ const buttonVariants = cva(
           "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline p-0 h-auto",
+        instagram: "bg-gradient-to-r from-pink-500 to-purple-500 text-white hover:from-pink-600 hover:to-purple-600 shadow-sm hover:shadow",
+        facebook: "bg-blue-600 text-white hover:bg-blue-700 shadow-sm hover:shadow",
+        twitter: "bg-sky-500 text-white hover:bg-sky-600 shadow-sm hover:shadow",
       },
       size: {
         default: "h-10 px-4 py-2",

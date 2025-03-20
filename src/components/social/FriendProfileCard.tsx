@@ -1,7 +1,13 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { MapPin } from "lucide-react";
+import { MapPin, Instagram, Facebook, Twitter } from "lucide-react";
+
+interface SocialLinks {
+  instagram?: string;
+  facebook?: string;
+  twitter?: string;
+}
 
 interface Friend {
   id: string;
@@ -15,6 +21,7 @@ interface Friend {
   following: number;
   isFollowing: boolean;
   routines: string[];
+  socialLinks?: SocialLinks;
 }
 
 interface FriendProfileCardProps {
@@ -59,6 +66,41 @@ const FriendProfileCard = ({ friend }: FriendProfileCardProps) => {
                 <div className="text-sm text-muted-foreground">Siguiendo</div>
               </div>
             </div>
+            
+            {friend.socialLinks && (
+              <div className="flex justify-center sm:justify-start space-x-3 pt-2">
+                {friend.socialLinks.instagram && (
+                  <a 
+                    href={`https://instagram.com/${friend.socialLinks.instagram.replace('@', '')}`}
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-pink-500 hover:text-pink-600 transition-colors"
+                  >
+                    <Instagram className="h-5 w-5" />
+                  </a>
+                )}
+                {friend.socialLinks.facebook && (
+                  <a 
+                    href={`https://facebook.com/${friend.socialLinks.facebook}`}
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="text-blue-600 hover:text-blue-700 transition-colors"
+                  >
+                    <Facebook className="h-5 w-5" />
+                  </a>
+                )}
+                {friend.socialLinks.twitter && (
+                  <a 
+                    href={`https://twitter.com/${friend.socialLinks.twitter.replace('@', '')}`}
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-sky-500 hover:text-sky-600 transition-colors"
+                  >
+                    <Twitter className="h-5 w-5" />
+                  </a>
+                )}
+              </div>
+            )}
           </div>
           
           <div>
