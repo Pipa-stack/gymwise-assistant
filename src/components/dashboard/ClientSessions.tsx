@@ -2,10 +2,11 @@
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, CalendarClock, CalendarCheck, CalendarPlus, Clock } from "lucide-react";
-import { format, isToday, addDays, differenceInDays } from "date-fns";
+import { ArrowRight, CalendarClock, CalendarCheck, CalendarPlus, Clock, Users } from "lucide-react";
+import { format, isToday, differenceInDays } from "date-fns";
 import { es } from "date-fns/locale";
 import { ScheduledSession } from "@/context/AppContext";
+import { toast } from "@/hooks/use-toast";
 
 interface ClientSessionsProps {
   sessions: ScheduledSession[];
@@ -20,20 +21,31 @@ const ClientSessions = ({ sessions }: ClientSessionsProps) => {
     const date = new Date(sessionDate);
     return differenceInDays(date, today);
   };
+
+  // Handle booking action
+  const handleBookClick = () => {
+    navigate("/calendar");
+    setTimeout(() => {
+      toast({
+        title: "Reserva una sesión",
+        description: "Selecciona una fecha y horario disponible para tu próxima sesión"
+      });
+    }, 300);
+  };
   
   return (
     <Card className="md:col-span-4 animate-slide-in-up [animation-delay:400ms] border-none shadow-md">
       <CardHeader className="bg-gradient-to-r from-primary/10 to-background/0 p-5 rounded-t-lg">
         <CardTitle className="flex items-center">
           <CalendarCheck className="h-5 w-5 mr-2 text-primary" />
-          Próximas Sesiones
+          Mis Sesiones Reservadas
         </CardTitle>
-        <CardDescription>Tus próximas sesiones de entrenamiento</CardDescription>
+        <CardDescription>Tus próximas sesiones de entrenamiento programadas</CardDescription>
       </CardHeader>
       <CardContent className="p-4 max-h-[350px] overflow-auto">
         {sessions.length > 0 ? (
           <div className="space-y-3">
-            {sessions.slice(0, 3).map(session => {
+            {sessions.slice(0, 4).map(session => {
               const sessionDate = new Date(session.date);
               const daysUntil = getDaysUntilSession(session.date);
               const isSessionToday = daysUntil === 0;
@@ -65,7 +77,8 @@ const ClientSessions = ({ sessions }: ClientSessionsProps) => {
                     </div>
                     
                     <div className="px-2 py-1 rounded-full bg-primary/10 text-primary text-xs">
-                      Reservado
+                      {session.status === "scheduled" ? "Reservado" : 
+                       session.status === "completed" ? "Completado" : "Cancelado"}
                     </div>
                   </div>
                   
@@ -79,7 +92,7 @@ const ClientSessions = ({ sessions }: ClientSessionsProps) => {
             })}
           </div>
         ) : (
-          <div className="flex h-32 items-center justify-center">
+          <div className="flex flex-col h-32 items-center justify-center">
             <div className="text-center">
               <CalendarClock className="mx-auto h-8 w-8 text-muted-foreground mb-2" />
               <p className="text-muted-foreground">No tienes sesiones programadas</p>
@@ -87,7 +100,7 @@ const ClientSessions = ({ sessions }: ClientSessionsProps) => {
                 variant="outline" 
                 size="sm" 
                 className="mt-3"
-                onClick={() => navigate("/calendar")}
+                onClick={handleBookClick}
               >
                 <CalendarPlus className="h-4 w-4 mr-2" />
                 Reservar Ahora

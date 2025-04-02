@@ -9,9 +9,11 @@ import { format, isSameDay } from "date-fns";
 import { es } from "date-fns/locale";
 import BookingCalendar from "@/components/BookingCalendar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useNavigate } from "react-router-dom";
 
 const Calendar = () => {
   const { mode, clients, sessions, cancelSession } = useAppContext();
+  const navigate = useNavigate();
   const [selectedClient, setSelectedClient] = useState<string | undefined>(
     mode === "client" ? clients[0]?.id : undefined
   );
@@ -46,6 +48,14 @@ const Calendar = () => {
   
   const handleCancelSession = (sessionId: string) => {
     cancelSession(sessionId);
+  };
+
+  // Custom callback for booking completion
+  const handleBookingSuccess = () => {
+    // Set session storage to signal that we just booked a session
+    sessionStorage.setItem("justBooked", "true");
+    // Navigate to home page to see the booked session
+    navigate("/");
   };
 
   return (
@@ -104,6 +114,7 @@ const Calendar = () => {
           <BookingCalendar 
             clientId={mode === "client" ? clients[0]?.id : selectedClient} 
             onDateChange={handleDateChange}
+            onBookingSuccess={handleBookingSuccess}
           />
         </TabsContent>
 

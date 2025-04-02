@@ -4,9 +4,22 @@ import { useAppContext } from "@/context/AppContext";
 import { isToday } from "date-fns";
 import TrainerDashboard from "@/components/dashboard/TrainerDashboard";
 import ClientDashboard from "@/components/dashboard/ClientDashboard";
+import { toast } from "@/hooks/use-toast";
 
 const Index = () => {
   const { mode, clients, trainingPlans, sessions, exercises } = useAppContext();
+
+  // Check if we just came from a booking
+  useEffect(() => {
+    const justBooked = sessionStorage.getItem("justBooked");
+    if (justBooked === "true") {
+      toast({
+        title: "¡Reserva confirmada!",
+        description: "Tu sesión ha sido reservada correctamente. Puedes verla en tu panel."
+      });
+      sessionStorage.removeItem("justBooked");
+    }
+  }, []);
 
   // Filter sessions to only include upcoming ones
   const upcomingSessions = sessions.filter(
