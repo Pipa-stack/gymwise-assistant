@@ -7,9 +7,10 @@ import { Activity, Send } from "lucide-react";
 type ChatInputProps = {
   onSendMessage: (text: string) => void;
   isTyping: boolean;
+  placeholder?: string; // Make placeholder optional
 };
 
-export const ChatInput = ({ onSendMessage, isTyping }: ChatInputProps) => {
+export const ChatInput = ({ onSendMessage, isTyping, placeholder }: ChatInputProps) => {
   const [inputText, setInputText] = useState("");
 
   const handleSend = () => {
@@ -28,7 +29,7 @@ export const ChatInput = ({ onSendMessage, isTyping }: ChatInputProps) => {
     <div className="flex w-full items-center space-x-2">
       <div className="flex-1 relative">
         <Input
-          placeholder="Escribe tu pregunta sobre fitness..."
+          placeholder={placeholder || "Escribe tu pregunta sobre fitness..."}
           value={inputText}
           onChange={(e) => setInputText(e.target.value)}
           onKeyPress={handleKeyPress}
