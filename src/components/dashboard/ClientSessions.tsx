@@ -2,7 +2,7 @@
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, CalendarClock, CalendarCheck, CalendarPlus, Clock, Users } from "lucide-react";
+import { ArrowRight, CalendarClock, CalendarCheck, CalendarPlus, Clock } from "lucide-react";
 import { format, isToday, differenceInDays } from "date-fns";
 import { es } from "date-fns/locale";
 import { ScheduledSession } from "@/types/contextTypes";
