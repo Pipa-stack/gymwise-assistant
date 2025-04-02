@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useAppContext } from "@/context/AppContext";
 import { format, isSameDay, isToday, addMonths, getDay, subMonths, differenceInDays } from "date-fns";
@@ -23,6 +22,7 @@ import { useNavigate } from "react-router-dom";
 interface BookingCalendarProps {
   clientId?: string;
   onDateChange?: (date: Date) => void;
+  onBookingSuccess?: () => void;
 }
 
 // Horarios disponibles por día
@@ -59,7 +59,6 @@ const timeSlotsByDay = {
     { id: "jue-2", startTime: "09:30", endTime: "11:00", capacity: 6 },
     { id: "jue-3", startTime: "11:00", endTime: "12:30", capacity: 6 },
     { id: "jue-4", startTime: "15:00", endTime: "16:30", capacity: 6 },
-    { id: "jue-5", startTime: "16:30", endTime: "18:00", capacity: 6 },
   ],
   5: [ // Viernes
     { id: "vie-1", startTime: "08:00", endTime: "09:30", capacity: 6 },
@@ -71,7 +70,7 @@ const timeSlotsByDay = {
   0: [], // Domingo - No hay horarios
 };
 
-const BookingCalendar = ({ clientId, onDateChange }: BookingCalendarProps) => {
+const BookingCalendar = ({ clientId, onDateChange, onBookingSuccess }: BookingCalendarProps) => {
   const { sessions, bookSession, cancelSession, clients, mode } = useAppContext();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [showReservationModal, setShowReservationModal] = useState(false);
@@ -153,10 +152,15 @@ const BookingCalendar = ({ clientId, onDateChange }: BookingCalendarProps) => {
         description: `Sesión reservada para el ${format(selectedDate, "dd 'de' MMMM", { locale: es })} de ${selectedStartTime} a ${selectedEndTime}`
       });
       
-      // Redirigir a inicio después de la reserva
-      setTimeout(() => {
-        navigate("/");
-      }, 2000);
+      // Call the onBookingSuccess callback if provided
+      if (onBookingSuccess) {
+        onBookingSuccess();
+      } else {
+        // Fallback to the original behavior if no callback is provided
+        setTimeout(() => {
+          navigate("/");
+        }, 2000);
+      }
     }
   };
   
