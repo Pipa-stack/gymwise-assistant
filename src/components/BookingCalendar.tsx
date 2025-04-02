@@ -220,7 +220,7 @@ const BookingCalendar = ({ clientId }: BookingCalendarProps) => {
                         : isAvailable 
                           ? "hover:bg-accent/80" 
                           : "opacity-40 cursor-not-allowed",
-                      isToday(date) && !selectedDate?.getTime() === date.getTime() && "border border-primary"
+                      isToday(date) && !(selectedDate && isSameDay(date, selectedDate)) && "border border-primary"
                     )}
                     onClick={() => isAvailable && setSelectedDate(date)}
                     disabled={!isAvailable}
