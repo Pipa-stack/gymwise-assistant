@@ -1,25 +1,21 @@
 
 import { useState } from "react";
 import { useAppContext } from "@/context/AppContext";
-import { format, isSameDay, isToday, addMonths } from "date-fns";
+import { format, isSameDay, isToday, addMonths, getDay } from "date-fns";
 import { es } from "date-fns/locale";
 import { Calendar as CalendarUI } from "@/components/ui/calendar";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { 
   CalendarClock, 
   CheckCircle, 
-  Clock, 
-  Users, 
-  X, 
+  Clock,
   Calendar,
-  ArrowRight,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Users
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Separator } from "@/components/ui/separator";
 import { toast } from "@/hooks/use-toast";
 
 interface BookingCalendarProps {
@@ -73,21 +69,13 @@ const timeSlotsByDay = {
 };
 
 const BookingCalendar = ({ clientId }: BookingCalendarProps) => {
-  const { availableSlots, sessions, bookSession, cancelSession, clients, mode } = useAppContext();
+  const { sessions, bookSession, cancelSession, clients, mode } = useAppContext();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [showReservationModal, setShowReservationModal] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
   const [selectedStartTime, setSelectedStartTime] = useState<string | null>(null);
   const [selectedEndTime, setSelectedEndTime] = useState<string | null>(null);
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
-  
-  // Obtener slots disponibles para la fecha seleccionada
-  const getTimeSlotsForDate = (date: Date | undefined) => {
-    if (!date) return [];
-    
-    const dayOfWeek = date.getDay(); // 0 (domingo) a 6 (sábado)
-    return timeSlotsByDay[dayOfWeek as keyof typeof timeSlotsByDay] || [];
-  };
   
   // Función para avanzar al siguiente mes
   const nextMonth = () => {
@@ -107,11 +95,6 @@ const BookingCalendar = ({ clientId }: BookingCalendarProps) => {
         session.status !== "cancelled"
       )
     : [];
-
-  // Función para obtener cliente por ID
-  const getClientById = (id: string) => {
-    return clients.find(client => client.id === id);
-  };
 
   // Función para manejar la reserva
   const handleBooking = (slotId: string, startTime: string, endTime: string) => {
@@ -133,22 +116,26 @@ const BookingCalendar = ({ clientId }: BookingCalendarProps) => {
   const confirmBooking = () => {
     if (clientId && selectedSlot && selectedDate) {
       const dateStr = selectedDate.toISOString().split('T')[0];
-      const slotId = `slot-${dateStr}-${selectedStartTime?.split(':')[0] || '9'}`;
-      bookSession(clientId, slotId);
+      bookSession(clientId, `${selectedSlot}-${dateStr}`);
       setShowReservationModal(false);
       setSelectedSlot(null);
+      
+      toast({
+        title: "Reserva confirmada",
+        description: `Sesión reservada para el ${format(selectedDate, "dd 'de' MMMM", { locale: es })} de ${selectedStartTime} a ${selectedEndTime}`
+      });
     }
   };
 
-  // Función para manejar la cancelación
-  const handleCancel = (sessionId: string) => {
-    cancelSession(sessionId);
+  // Función para obtener el nombre del día y fecha en formato legible
+  const getFormattedDateHeader = (date: Date) => {
+    return `📅 ${format(date, "EEEE d 'de' MMMM, yyyy", { locale: es })}`;
   };
 
   // Función para determinar si una fecha tiene slots disponibles
   const hasAvailableSlots = (date: Date) => {
-    const dayOfWeek = date.getDay();
-    return timeSlotsByDay[dayOfWeek as keyof typeof timeSlotsByDay]?.length > 0;
+    const dayOfWeek = getDay(date);
+    return (dayOfWeek > 0 && dayOfWeek < 6); // Solo Lunes a Viernes
   };
 
   // Obtener el número de personas inscritas para un horario específico
@@ -164,14 +151,29 @@ const BookingCalendar = ({ clientId }: BookingCalendarProps) => {
     ).length;
   };
 
-  // Días de la semana en español
-  const weekDays = ["dom.", "lun.", "mar.", "mié.", "jue.", "vie.", "sáb."];
+  // Verificar si el cliente ya tiene una reserva en este horario
+  const hasExistingBooking = (date: Date, slotStartTime: string) => {
+    if (!clientId || !date) return false;
+    const dateStr = date.toISOString().split('T')[0];
+    
+    return sessions.some(session => 
+      session.date === dateStr && 
+      session.startTime === slotStartTime &&
+      session.clientId === clientId &&
+      session.status !== "cancelled"
+    );
+  };
+
+  // Obtener los slots para la fecha seleccionada
+  const timeSlotsForSelectedDate = selectedDate 
+    ? timeSlotsByDay[getDay(selectedDate) as keyof typeof timeSlotsByDay] || []
+    : [];
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-        <Card className="md:col-span-12">
-          <CardHeader>
+      <div className="grid grid-cols-1 gap-6">
+        <Card>
+          <CardHeader className="pb-3">
             <CardTitle className="text-xl flex items-center">
               <Calendar className="h-5 w-5 mr-2 text-primary" />
               Reserva tu sesión
@@ -179,157 +181,149 @@ const BookingCalendar = ({ clientId }: BookingCalendarProps) => {
             <CardDescription>
               Selecciona una fecha y horario disponible para tu próxima sesión de entrenamiento
             </CardDescription>
+            
+            <div className="flex justify-between items-center mt-4">
+              <button 
+                className="p-2 rounded-md hover:bg-accent transition-colors"
+                onClick={prevMonth}
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </button>
+              <h3 className="text-lg font-medium">
+                {format(currentMonth, "MMMM yyyy", { locale: es })}
+              </h3>
+              <button 
+                className="p-2 rounded-md hover:bg-accent transition-colors"
+                onClick={nextMonth}
+              >
+                <ChevronRight className="h-5 w-5" />
+              </button>
+            </div>
           </CardHeader>
           
-          <CardContent className="p-0">
-            <div className="p-4 md:p-6">
-              <div className="flex justify-between items-center mb-4">
-                <button 
-                  className="p-2 rounded-full hover:bg-accent transition-colors"
-                  onClick={prevMonth}
-                >
-                  <ChevronLeft className="h-5 w-5" />
-                </button>
-                <h3 className="text-xl font-medium">
-                  Elige fecha y hora
-                </h3>
-                <button 
-                  className="p-2 rounded-full hover:bg-accent transition-colors"
-                  onClick={nextMonth}
-                >
-                  <ChevronRight className="h-5 w-5" />
-                </button>
-              </div>
-              
-              <p className="text-center text-lg mb-4 font-medium">
-                {format(currentMonth, "MMMM, yyyy", { locale: es })}
-              </p>
-              
-              <div className="grid grid-cols-7 text-center mb-2">
-                {weekDays.map((day, index) => (
-                  <div key={index} className="text-sm font-medium text-muted-foreground">
-                    {day}
-                  </div>
-                ))}
-              </div>
-              
-              <div className="grid grid-cols-7 gap-1 mb-6">
-                {Array.from({ length: 35 }, (_, i) => {
-                  const date = new Date(currentMonth);
-                  date.setDate(1);
-                  const firstDayOfMonth = date.getDay(); // 0-6 (domingo-sábado)
-                  const daysInMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
-                  date.setDate(i - firstDayOfMonth + 1);
-                  
-                  const isCurrentMonth = date.getMonth() === currentMonth.getMonth();
-                  const isSelected = selectedDate && isSameDay(date, selectedDate);
-                  const isAvailable = hasAvailableSlots(date) && isCurrentMonth;
-                  const isTodayDate = isToday(date);
-                  
-                  return (
-                    <button
-                      key={i}
-                      className={cn(
-                        "h-10 w-10 rounded-full flex items-center justify-center mx-auto text-sm font-medium",
-                        isCurrentMonth ? "" : "opacity-40",
-                        isSelected 
-                          ? "bg-primary text-white" 
-                          : isAvailable 
-                            ? "hover:bg-accent/80" 
-                            : "opacity-40",
-                        isTodayDate && !isSelected && "border border-primary text-primary",
-                        !isAvailable && "cursor-not-allowed"
-                      )}
-                      onClick={() => isAvailable && setSelectedDate(date)}
-                      disabled={!isAvailable}
-                    >
-                      {date.getDate()}
-                    </button>
-                  );
-                })}
-              </div>
-              
-              {/* Horarios disponibles */}
-              {selectedDate && (
-                <div>
-                  <h3 className="text-lg font-medium mb-3">
-                    Horarios disponibles para {format(selectedDate, "EEEE, dd 'de' MMMM", { locale: es })}
-                  </h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                    {getTimeSlotsForDate(selectedDate).map(slot => {
-                      const occupancy = getSlotOccupancy(selectedDate, slot.startTime);
-                      const isFullyBooked = occupancy >= slot.capacity;
-                      const isBooked = sessionsForSelectedDate.some(
-                        session => session.startTime === slot.startTime
-                      );
-                      
-                      return (
-                        <button
-                          key={slot.id}
-                          onClick={() => !isBooked && !isFullyBooked && handleBooking(slot.id, slot.startTime, slot.endTime)}
-                          disabled={(isBooked && mode === "client") || isFullyBooked}
-                          className={cn(
-                            "border p-3 rounded-lg text-sm font-medium flex flex-col items-center",
-                            isFullyBooked 
-                              ? "opacity-60 cursor-not-allowed border-muted bg-muted/20" 
-                              : (isBooked && mode === "client") 
-                                ? "opacity-60 cursor-not-allowed border-muted" 
-                                : "border-primary/20 hover:border-primary bg-white dark:bg-gray-800",
-                            "transition-transform hover:scale-[1.02]"
-                          )}
-                        >
-                          <span className="text-base font-bold">{slot.startTime} - {slot.endTime}</span>
-                          <span className={cn(
-                            "text-xs mt-1",
-                            occupancy === slot.capacity 
-                              ? "text-red-500 font-medium" 
-                              : occupancy > slot.capacity / 2 
-                                ? "text-amber-500" 
-                                : "text-muted-foreground"
-                          )}>
-                            Aforo: {occupancy} / {slot.capacity}
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-              
-              <div className="mt-6 flex justify-center">
-                <Button 
-                  variant="outline" 
-                  className="font-medium px-10"
-                  onClick={() => setSelectedDate(new Date())}
-                >
-                  Atrás
-                </Button>
-              </div>
+          <CardContent className="pt-0">
+            <div className="flex overflow-x-auto pb-2 -mx-1 px-1">
+              {Array.from({ length: 7 }, (_, i) => {
+                const date = new Date();
+                date.setDate(date.getDate() + i);
+                const isAvailable = hasAvailableSlots(date);
+                const dayNumber = date.getDate();
+                const dayName = format(date, "EEE", { locale: es });
+                
+                return (
+                  <button
+                    key={i}
+                    className={cn(
+                      "min-w-16 h-16 rounded-md flex flex-col items-center justify-center mx-1",
+                      selectedDate && isSameDay(date, selectedDate) 
+                        ? "bg-primary text-primary-foreground" 
+                        : isAvailable 
+                          ? "hover:bg-accent/80" 
+                          : "opacity-40 cursor-not-allowed",
+                      isToday(date) && !selectedDate?.getTime() === date.getTime() && "border border-primary"
+                    )}
+                    onClick={() => isAvailable && setSelectedDate(date)}
+                    disabled={!isAvailable}
+                  >
+                    <span className="text-xs font-medium uppercase">{dayName}</span>
+                    <span className="text-xl font-bold">{dayNumber}</span>
+                  </button>
+                );
+              })}
             </div>
           </CardContent>
-          
-          {mode === "trainer" && (
-            <CardFooter className="p-4 bg-gray-50 dark:bg-gray-900/50">
-              <Button 
-                variant="outline" 
-                className="w-full"
-                onClick={() => toast({
-                  title: "Gestión de disponibilidad",
-                  description: "Esta funcionalidad estará disponible próximamente"
-                })}
-              >
-                <Users className="h-4 w-4 mr-2" />
-                Gestionar disponibilidad
-              </Button>
-            </CardFooter>
-          )}
         </Card>
+
+        {selectedDate && (
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg flex items-center justify-between">
+                <div className="flex items-center">
+                  <CalendarClock className="h-5 w-5 mr-2 text-primary" />
+                  <span>{getFormattedDateHeader(selectedDate)}</span>
+                </div>
+                {hasAvailableSlots(selectedDate) && (
+                  <Button variant="ghost" size="sm" onClick={() => setSelectedDate(new Date())}>
+                    Hoy
+                  </Button>
+                )}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {timeSlotsForSelectedDate.length > 0 ? (
+                <div className="space-y-3">
+                  {timeSlotsForSelectedDate.map(slot => {
+                    const occupancy = getSlotOccupancy(selectedDate, slot.startTime);
+                    const isFullyBooked = occupancy >= slot.capacity;
+                    const isBooked = hasExistingBooking(selectedDate, slot.startTime);
+                    
+                    return (
+                      <div 
+                        key={slot.id}
+                        className={cn(
+                          "p-4 border rounded-lg flex justify-between items-center",
+                          isBooked ? "bg-primary/10 border-primary/30" : "",
+                          isFullyBooked ? "opacity-60" : ""
+                        )}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="bg-muted rounded-full p-2">
+                            <Clock className="h-5 w-5" />
+                          </div>
+                          <div>
+                            <div className="font-medium">{slot.startTime} – {slot.endTime}</div>
+                            <div className={cn(
+                              "text-sm flex items-center gap-1",
+                              occupancy === slot.capacity ? "text-red-500" : 
+                              occupancy > slot.capacity / 2 ? "text-amber-500" : 
+                              "text-green-500"
+                            )}>
+                              <Users className="h-3 w-3" />
+                              <span>({occupancy}/{slot.capacity})</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div>
+                          {isBooked ? (
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              className="border-primary/30 text-primary"
+                            >
+                              <CheckCircle className="h-4 w-4 mr-1" />
+                              Reservado
+                            </Button>
+                          ) : (
+                            <Button
+                              size="sm"
+                              disabled={isFullyBooked}
+                              onClick={() => handleBooking(slot.id, slot.startTime, slot.endTime)}
+                              className={isFullyBooked ? "opacity-50" : ""}
+                            >
+                              {isFullyBooked ? "Completo" : "Reservar"}
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center h-40 text-center">
+                  <CalendarClock className="h-10 w-10 text-muted-foreground mb-2" />
+                  <p className="text-muted-foreground">No hay horarios disponibles para este día</p>
+                  <p className="text-sm text-muted-foreground">Selecciona otra fecha o contacta con tu entrenador</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       {/* Modal de confirmación de reserva */}
       {showReservationModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <Card className="w-full max-w-md animate-in fade-in-0 slide-in-from-bottom-5">
+          <Card className="w-full max-w-md animate-in fade-in-0">
             <CardHeader>
               <CardTitle>Confirmar reserva</CardTitle>
               <CardDescription>
@@ -340,7 +334,7 @@ const BookingCalendar = ({ clientId }: BookingCalendarProps) => {
               {selectedDate && (
                 <div className="space-y-2">
                   <p><span className="font-medium">Fecha:</span> {format(selectedDate, "EEEE, dd 'de' MMMM 'de' yyyy", { locale: es })}</p>
-                  <p><span className="font-medium">Hora:</span> {selectedStartTime} - {selectedEndTime}</p>
+                  <p><span className="font-medium">Hora:</span> {selectedStartTime} – {selectedEndTime}</p>
                   <p><span className="font-medium">Duración:</span> 1h 30min</p>
                 </div>
               )}

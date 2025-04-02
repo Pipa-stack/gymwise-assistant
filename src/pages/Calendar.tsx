@@ -8,6 +8,7 @@ import { CalendarCheck, CalendarClock, CalendarDays, Calendar as CalendarIcon } 
 import { format, isSameDay } from "date-fns";
 import { es } from "date-fns/locale";
 import BookingCalendar from "@/components/BookingCalendar";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const Calendar = () => {
   const { mode, clients, sessions } = useAppContext();
@@ -24,6 +25,10 @@ const Calendar = () => {
   const todaySessions = sessions.filter(
     session => isSameDay(new Date(session.date), new Date()) && session.status === "scheduled"
   ).sort((a, b) => a.startTime.localeCompare(b.startTime));
+
+  const handleSelectClient = (clientId: string) => {
+    setSelectedClient(clientId);
+  };
 
   return (
     <div className="space-y-6">
@@ -54,6 +59,23 @@ const Calendar = () => {
         </TabsList>
 
         <TabsContent value="bookings" className="space-y-6">
+          {mode === "trainer" && (
+            <div className="bg-muted/30 p-4 rounded-lg mb-4">
+              <label className="block text-sm font-medium mb-2">Seleccionar cliente:</label>
+              <Select onValueChange={handleSelectClient} value={selectedClient}>
+                <SelectTrigger className="w-full max-w-xs">
+                  <SelectValue placeholder="Seleccionar cliente" />
+                </SelectTrigger>
+                <SelectContent>
+                  {clients.map(client => (
+                    <SelectItem key={client.id} value={client.id}>
+                      {client.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
           <BookingCalendar clientId={mode === "client" ? clients[0]?.id : selectedClient} />
         </TabsContent>
 
