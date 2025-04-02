@@ -330,6 +330,36 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       return;
     }
     
+    const existingSessionsCount = sessions.filter(
+      s => s.date === slot.date && 
+           s.startTime === slot.startTime &&
+           s.status !== "cancelled"
+    ).length;
+    
+    const sessionDate = new Date(slot.date);
+    const dayOfWeek = sessionDate.getDay();
+    
+    const timeSlotsByDay = {
+      1: 6,
+      2: 6,
+      3: 6,
+      4: 6,
+      5: 6,
+      6: 0,
+      0: 0
+    };
+    
+    const maxCapacity = timeSlotsByDay[dayOfWeek as keyof typeof timeSlotsByDay] || 0;
+    
+    if (existingSessionsCount >= maxCapacity) {
+      toast({
+        title: "Aforo completo",
+        description: "Este horario ha alcanzado su capacidad máxima",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     const newSession: ScheduledSession = {
       id: `session-${Date.now()}`,
       clientId,
@@ -341,9 +371,11 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     
     setSessions(prev => [...prev, newSession]);
     
-    setAvailableSlots(prev => 
-      prev.map(s => s.id === slotId ? {...s, isTaken: true} : s)
-    );
+    if (mode === "client") {
+      setAvailableSlots(prev => 
+        prev.map(s => s.id === slotId ? {...s, isTaken: true} : s)
+      );
+    }
     
     toast({
       title: "Reserva confirmada",
@@ -588,11 +620,9 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
             ...routine,
             exercises: routine.exercises.map(exercise => {
               if (exercise.id === routineExerciseId) {
-                // Solo eliminamos si hay más de un set
                 if (exercise.sets.length > 1) {
                   const filteredSets = exercise.sets.filter(set => set.id !== setId);
                   
-                  // Renumeramos los sets
                   const renumberedSets = filteredSets.map((set, index) => ({
                     ...set,
                     setNumber: index + 1

@@ -44,12 +44,16 @@ const timeSlotsByDay = {
     { id: "mar-4", startTime: "15:00", endTime: "16:30", capacity: 6 },
     { id: "mar-5", startTime: "16:30", endTime: "18:00", capacity: 6 },
     { id: "mar-6", startTime: "18:00", endTime: "19:30", capacity: 6 },
+    { id: "mar-7", startTime: "19:30", endTime: "21:00", capacity: 6 },
   ],
   3: [ // Miércoles
-    { id: "mie-1", startTime: "09:30", endTime: "11:00", capacity: 6 },
-    { id: "mie-2", startTime: "11:00", endTime: "12:30", capacity: 6 },
-    { id: "mie-3", startTime: "16:30", endTime: "18:00", capacity: 6 },
-    { id: "mie-4", startTime: "18:00", endTime: "19:30", capacity: 6 },
+    { id: "mie-1", startTime: "08:00", endTime: "09:30", capacity: 6 },
+    { id: "mie-2", startTime: "09:30", endTime: "11:00", capacity: 6 },
+    { id: "mie-3", startTime: "11:00", endTime: "12:30", capacity: 6 },
+    { id: "mie-4", startTime: "15:00", endTime: "16:30", capacity: 6 },
+    { id: "mie-5", startTime: "16:30", endTime: "18:00", capacity: 6 },
+    { id: "mie-6", startTime: "18:00", endTime: "19:30", capacity: 6 },
+    { id: "mie-7", startTime: "19:30", endTime: "21:00", capacity: 6 },
   ],
   4: [ // Jueves
     { id: "jue-1", startTime: "08:00", endTime: "09:30", capacity: 6 },
@@ -57,13 +61,12 @@ const timeSlotsByDay = {
     { id: "jue-3", startTime: "11:00", endTime: "12:30", capacity: 6 },
     { id: "jue-4", startTime: "15:00", endTime: "16:30", capacity: 6 },
     { id: "jue-5", startTime: "16:30", endTime: "18:00", capacity: 6 },
-    { id: "jue-6", startTime: "18:00", endTime: "19:30", capacity: 6 },
   ],
   5: [ // Viernes
-    { id: "vie-1", startTime: "09:30", endTime: "11:00", capacity: 6 },
-    { id: "vie-2", startTime: "11:00", endTime: "12:30", capacity: 6 },
-    { id: "vie-3", startTime: "16:30", endTime: "18:00", capacity: 6 },
-    { id: "vie-4", startTime: "18:00", endTime: "19:30", capacity: 6 },
+    { id: "vie-1", startTime: "08:00", endTime: "09:30", capacity: 6 },
+    { id: "vie-2", startTime: "09:30", endTime: "11:00", capacity: 6 },
+    { id: "vie-3", startTime: "11:00", endTime: "12:30", capacity: 6 },
+    { id: "vie-4", startTime: "15:00", endTime: "16:30", capacity: 6 },
   ],
   6: [], // Sábado - No hay horarios
   0: [], // Domingo - No hay horarios
@@ -148,9 +151,17 @@ const BookingCalendar = ({ clientId }: BookingCalendarProps) => {
     return timeSlotsByDay[dayOfWeek as keyof typeof timeSlotsByDay]?.length > 0;
   };
 
-  // Determinar el aforo actual (simulado)
-  const getRandomOccupancy = (capacity: number) => {
-    return Math.floor(Math.random() * (capacity + 1));
+  // Obtener el número de personas inscritas para un horario específico
+  const getSlotOccupancy = (date: Date, slotStartTime: string) => {
+    if (!date) return 0;
+    const dateStr = date.toISOString().split('T')[0];
+    
+    // Contar sesiones para esta fecha y hora de inicio
+    return sessions.filter(session => 
+      session.date === dateStr && 
+      session.startTime === slotStartTime &&
+      session.status !== "cancelled"
+    ).length;
   };
 
   // Días de la semana en español
@@ -246,7 +257,8 @@ const BookingCalendar = ({ clientId }: BookingCalendarProps) => {
                   </h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                     {getTimeSlotsForDate(selectedDate).map(slot => {
-                      const occupancy = getRandomOccupancy(slot.capacity);
+                      const occupancy = getSlotOccupancy(selectedDate, slot.startTime);
+                      const isFullyBooked = occupancy >= slot.capacity;
                       const isBooked = sessionsForSelectedDate.some(
                         session => session.startTime === slot.startTime
                       );
@@ -254,18 +266,27 @@ const BookingCalendar = ({ clientId }: BookingCalendarProps) => {
                       return (
                         <button
                           key={slot.id}
-                          onClick={() => !isBooked && handleBooking(slot.id, slot.startTime, slot.endTime)}
-                          disabled={isBooked && mode === "client"}
+                          onClick={() => !isBooked && !isFullyBooked && handleBooking(slot.id, slot.startTime, slot.endTime)}
+                          disabled={(isBooked && mode === "client") || isFullyBooked}
                           className={cn(
-                            "border bg-white dark:bg-gray-800 p-3 rounded-lg text-sm font-medium flex flex-col items-center",
-                            isBooked && mode === "client" 
-                              ? "opacity-60 cursor-not-allowed border-muted" 
-                              : "border-primary/20 hover:border-primary",
+                            "border p-3 rounded-lg text-sm font-medium flex flex-col items-center",
+                            isFullyBooked 
+                              ? "opacity-60 cursor-not-allowed border-muted bg-muted/20" 
+                              : (isBooked && mode === "client") 
+                                ? "opacity-60 cursor-not-allowed border-muted" 
+                                : "border-primary/20 hover:border-primary bg-white dark:bg-gray-800",
                             "transition-transform hover:scale-[1.02]"
                           )}
                         >
                           <span className="text-base font-bold">{slot.startTime} - {slot.endTime}</span>
-                          <span className="text-xs mt-1 text-muted-foreground">
+                          <span className={cn(
+                            "text-xs mt-1",
+                            occupancy === slot.capacity 
+                              ? "text-red-500 font-medium" 
+                              : occupancy > slot.capacity / 2 
+                                ? "text-amber-500" 
+                                : "text-muted-foreground"
+                          )}>
                             Aforo: {occupancy} / {slot.capacity}
                           </span>
                         </button>
@@ -320,7 +341,7 @@ const BookingCalendar = ({ clientId }: BookingCalendarProps) => {
                 <div className="space-y-2">
                   <p><span className="font-medium">Fecha:</span> {format(selectedDate, "EEEE, dd 'de' MMMM 'de' yyyy", { locale: es })}</p>
                   <p><span className="font-medium">Hora:</span> {selectedStartTime} - {selectedEndTime}</p>
-                  <p><span className="font-medium">Duración:</span> Variable</p>
+                  <p><span className="font-medium">Duración:</span> 1h 30min</p>
                 </div>
               )}
             </CardContent>
@@ -336,7 +357,6 @@ const BookingCalendar = ({ clientId }: BookingCalendarProps) => {
                 Cancelar
               </Button>
               <Button 
-                variant="green"
                 className="w-full"
                 onClick={confirmBooking}
               >

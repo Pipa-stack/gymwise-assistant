@@ -34,7 +34,7 @@ const Calendar = () => {
             <CalendarIcon className="h-4 w-4" />
             <span>Hoy</span>
           </Button>
-          <Button variant="green" className="gap-1">
+          <Button className="gap-1">
             <CalendarClock className="h-4 w-4" />
             <span>Reservar</span>
           </Button>
