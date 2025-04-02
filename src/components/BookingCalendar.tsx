@@ -1,9 +1,8 @@
 
 import { useState } from "react";
 import { useAppContext } from "@/context/AppContext";
-import { format, isSameDay, isToday, addMonths, getDay } from "date-fns";
+import { format, isSameDay, isToday, addMonths, getDay, subMonths } from "date-fns";
 import { es } from "date-fns/locale";
-import { Calendar as CalendarUI } from "@/components/ui/calendar";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { 
@@ -13,13 +12,15 @@ import {
   Calendar,
   ChevronLeft,
   ChevronRight,
-  Users
+  Users,
+  X
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
 
 interface BookingCalendarProps {
   clientId?: string;
+  onDateChange?: (date: Date) => void;
 }
 
 // Horarios disponibles por día
@@ -68,13 +69,15 @@ const timeSlotsByDay = {
   0: [], // Domingo - No hay horarios
 };
 
-const BookingCalendar = ({ clientId }: BookingCalendarProps) => {
+const BookingCalendar = ({ clientId, onDateChange }: BookingCalendarProps) => {
   const { sessions, bookSession, cancelSession, clients, mode } = useAppContext();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [showReservationModal, setShowReservationModal] = useState(false);
+  const [showCancelModal, setShowCancelModal] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
   const [selectedStartTime, setSelectedStartTime] = useState<string | null>(null);
   const [selectedEndTime, setSelectedEndTime] = useState<string | null>(null);
+  const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
   
   // Función para avanzar al siguiente mes
@@ -84,7 +87,23 @@ const BookingCalendar = ({ clientId }: BookingCalendarProps) => {
 
   // Función para retroceder al mes anterior
   const prevMonth = () => {
-    setCurrentMonth(addMonths(currentMonth, -1));
+    setCurrentMonth(subMonths(currentMonth, 1));
+  };
+  
+  // Función para ir al día actual
+  const goToToday = () => {
+    const today = new Date();
+    setSelectedDate(today);
+    setCurrentMonth(today);
+    
+    if (onDateChange) {
+      onDateChange(today);
+    }
+    
+    toast({
+      title: "Fecha actualizada",
+      description: "Mostrando el día de hoy"
+    });
   };
   
   // Obtener sesiones programadas para la fecha seleccionada
@@ -112,6 +131,12 @@ const BookingCalendar = ({ clientId }: BookingCalendarProps) => {
     }
   };
 
+  // Función para manejar la cancelación
+  const handleCancelBooking = (sessionId: string) => {
+    setSelectedSessionId(sessionId);
+    setShowCancelModal(true);
+  };
+
   // Función para confirmar la reserva
   const confirmBooking = () => {
     if (clientId && selectedSlot && selectedDate) {
@@ -124,6 +149,15 @@ const BookingCalendar = ({ clientId }: BookingCalendarProps) => {
         title: "Reserva confirmada",
         description: `Sesión reservada para el ${format(selectedDate, "dd 'de' MMMM", { locale: es })} de ${selectedStartTime} a ${selectedEndTime}`
       });
+    }
+  };
+  
+  // Función para confirmar la cancelación
+  const confirmCancelBooking = () => {
+    if (selectedSessionId) {
+      cancelSession(selectedSessionId);
+      setShowCancelModal(false);
+      setSelectedSessionId(null);
     }
   };
 
@@ -156,18 +190,29 @@ const BookingCalendar = ({ clientId }: BookingCalendarProps) => {
     if (!clientId || !date) return false;
     const dateStr = date.toISOString().split('T')[0];
     
-    return sessions.some(session => 
+    const existingSession = sessions.find(session => 
       session.date === dateStr && 
       session.startTime === slotStartTime &&
       session.clientId === clientId &&
       session.status !== "cancelled"
     );
+    
+    return existingSession ? existingSession : false;
   };
 
   // Obtener los slots para la fecha seleccionada
   const timeSlotsForSelectedDate = selectedDate 
     ? timeSlotsByDay[getDay(selectedDate) as keyof typeof timeSlotsByDay] || []
     : [];
+
+  // Función que se ejecuta cuando cambia la fecha seleccionada
+  const handleDateChange = (date: Date) => {
+    setSelectedDate(date);
+    
+    if (onDateChange) {
+      onDateChange(date);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -186,6 +231,7 @@ const BookingCalendar = ({ clientId }: BookingCalendarProps) => {
               <button 
                 className="p-2 rounded-md hover:bg-accent transition-colors"
                 onClick={prevMonth}
+                aria-label="Mes anterior"
               >
                 <ChevronLeft className="h-5 w-5" />
               </button>
@@ -195,6 +241,7 @@ const BookingCalendar = ({ clientId }: BookingCalendarProps) => {
               <button 
                 className="p-2 rounded-md hover:bg-accent transition-colors"
                 onClick={nextMonth}
+                aria-label="Mes siguiente"
               >
                 <ChevronRight className="h-5 w-5" />
               </button>
@@ -203,7 +250,7 @@ const BookingCalendar = ({ clientId }: BookingCalendarProps) => {
           
           <CardContent className="pt-0">
             <div className="flex overflow-x-auto pb-2 -mx-1 px-1">
-              {Array.from({ length: 7 }, (_, i) => {
+              {Array.from({ length: 10 }, (_, i) => {
                 const date = new Date();
                 date.setDate(date.getDate() + i);
                 const isAvailable = hasAvailableSlots(date);
@@ -222,7 +269,7 @@ const BookingCalendar = ({ clientId }: BookingCalendarProps) => {
                           : "opacity-40 cursor-not-allowed",
                       isToday(date) && !(selectedDate && isSameDay(date, selectedDate)) && "border border-primary"
                     )}
-                    onClick={() => isAvailable && setSelectedDate(date)}
+                    onClick={() => isAvailable && handleDateChange(date)}
                     disabled={!isAvailable}
                   >
                     <span className="text-xs font-medium uppercase">{dayName}</span>
@@ -230,6 +277,18 @@ const BookingCalendar = ({ clientId }: BookingCalendarProps) => {
                   </button>
                 );
               })}
+            </div>
+            
+            <div className="flex justify-end mt-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={goToToday}
+                className="text-xs"
+              >
+                <Calendar className="h-3 w-3 mr-1" />
+                Ir a hoy
+              </Button>
             </div>
           </CardContent>
         </Card>
@@ -243,7 +302,7 @@ const BookingCalendar = ({ clientId }: BookingCalendarProps) => {
                   <span>{getFormattedDateHeader(selectedDate)}</span>
                 </div>
                 {hasAvailableSlots(selectedDate) && (
-                  <Button variant="ghost" size="sm" onClick={() => setSelectedDate(new Date())}>
+                  <Button variant="ghost" size="sm" onClick={goToToday}>
                     Hoy
                   </Button>
                 )}
@@ -255,7 +314,8 @@ const BookingCalendar = ({ clientId }: BookingCalendarProps) => {
                   {timeSlotsForSelectedDate.map(slot => {
                     const occupancy = getSlotOccupancy(selectedDate, slot.startTime);
                     const isFullyBooked = occupancy >= slot.capacity;
-                    const isBooked = hasExistingBooking(selectedDate, slot.startTime);
+                    const existingBooking = hasExistingBooking(selectedDate, slot.startTime);
+                    const isBooked = Boolean(existingBooking);
                     
                     return (
                       <div 
@@ -263,7 +323,7 @@ const BookingCalendar = ({ clientId }: BookingCalendarProps) => {
                         className={cn(
                           "p-4 border rounded-lg flex justify-between items-center",
                           isBooked ? "bg-primary/10 border-primary/30" : "",
-                          isFullyBooked ? "opacity-60" : ""
+                          isFullyBooked && !isBooked ? "opacity-60" : ""
                         )}
                       >
                         <div className="flex items-center gap-3">
@@ -285,14 +345,23 @@ const BookingCalendar = ({ clientId }: BookingCalendarProps) => {
                         </div>
                         <div>
                           {isBooked ? (
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              className="border-primary/30 text-primary"
-                            >
-                              <CheckCircle className="h-4 w-4 mr-1" />
-                              Reservado
-                            </Button>
+                            <div className="flex gap-2">
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                className="border-primary/30 text-primary"
+                              >
+                                <CheckCircle className="h-4 w-4 mr-1" />
+                                Reservado
+                              </Button>
+                              <Button 
+                                variant="destructive" 
+                                size="sm"
+                                onClick={() => existingBooking && handleCancelBooking(existingBooking.id)}
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            </div>
                           ) : (
                             <Button
                               size="sm"
@@ -355,6 +424,42 @@ const BookingCalendar = ({ clientId }: BookingCalendarProps) => {
                 onClick={confirmBooking}
               >
                 Confirmar
+              </Button>
+            </CardFooter>
+          </Card>
+        </div>
+      )}
+      
+      {/* Modal de confirmación de cancelación */}
+      {showCancelModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <Card className="w-full max-w-md animate-in fade-in-0">
+            <CardHeader>
+              <CardTitle>Cancelar reserva</CardTitle>
+              <CardDescription>
+                ¿Estás seguro de que deseas cancelar esta reserva?
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">Esta acción no se puede deshacer.</p>
+            </CardContent>
+            <CardFooter className="flex justify-between gap-2">
+              <Button 
+                variant="outline" 
+                className="w-full"
+                onClick={() => {
+                  setShowCancelModal(false);
+                  setSelectedSessionId(null);
+                }}
+              >
+                Volver
+              </Button>
+              <Button 
+                variant="destructive"
+                className="w-full"
+                onClick={confirmCancelBooking}
+              >
+                Cancelar reserva
               </Button>
             </CardFooter>
           </Card>

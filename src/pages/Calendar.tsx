@@ -11,10 +11,12 @@ import BookingCalendar from "@/components/BookingCalendar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const Calendar = () => {
-  const { mode, clients, sessions } = useAppContext();
+  const { mode, clients, sessions, cancelSession } = useAppContext();
   const [selectedClient, setSelectedClient] = useState<string | undefined>(
     mode === "client" ? clients[0]?.id : undefined
   );
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [activeTab, setActiveTab] = useState("bookings");
   
   // Sesiones próximas (futuras)
   const upcomingSessions = sessions.filter(
@@ -29,24 +31,47 @@ const Calendar = () => {
   const handleSelectClient = (clientId: string) => {
     setSelectedClient(clientId);
   };
+  
+  const handleDateChange = (date: Date) => {
+    setSelectedDate(date);
+  };
+  
+  const handleGoToToday = () => {
+    setSelectedDate(new Date());
+  };
+  
+  const handleBookNow = () => {
+    setActiveTab("bookings");
+  };
+  
+  const handleCancelSession = (sessionId: string) => {
+    cancelSession(sessionId);
+  };
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <h1 className="text-3xl font-bold tracking-tight">Calendario</h1>
         <div className="flex items-center gap-2">
-          <Button variant="outline" className="gap-1">
+          <Button 
+            variant="outline" 
+            className="gap-1"
+            onClick={handleGoToToday}
+          >
             <CalendarIcon className="h-4 w-4" />
             <span>Hoy</span>
           </Button>
-          <Button className="gap-1">
+          <Button 
+            className="gap-1"
+            onClick={handleBookNow}
+          >
             <CalendarClock className="h-4 w-4" />
             <span>Reservar</span>
           </Button>
         </div>
       </div>
 
-      <Tabs defaultValue="bookings" className="space-y-6">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList className="bg-muted/50">
           <TabsTrigger value="bookings" className="flex items-center gap-1.5 data-[state=active]:bg-primary data-[state=active]:text-white">
             <CalendarClock className="h-4 w-4" />
@@ -76,7 +101,10 @@ const Calendar = () => {
               </Select>
             </div>
           )}
-          <BookingCalendar clientId={mode === "client" ? clients[0]?.id : selectedClient} />
+          <BookingCalendar 
+            clientId={mode === "client" ? clients[0]?.id : selectedClient} 
+            onDateChange={handleDateChange}
+          />
         </TabsContent>
 
         <TabsContent value="schedule" className="space-y-6">
@@ -107,7 +135,18 @@ const Calendar = () => {
                               {session.startTime} - {session.endTime}
                             </div>
                           </div>
-                          <Button variant="outline" size="sm">Ver detalles</Button>
+                          <div className="flex gap-2">
+                            <Button variant="outline" size="sm">Ver detalles</Button>
+                            {mode === "trainer" && (
+                              <Button 
+                                variant="destructive" 
+                                size="sm"
+                                onClick={() => handleCancelSession(session.id)}
+                              >
+                                Cancelar
+                              </Button>
+                            )}
+                          </div>
                         </div>
                       );
                     })}
@@ -147,7 +186,18 @@ const Calendar = () => {
                               {session.startTime} - {session.endTime}
                             </div>
                           </div>
-                          <Button variant="outline" size="sm">Ver detalles</Button>
+                          <div className="flex gap-2">
+                            <Button variant="outline" size="sm">Ver detalles</Button>
+                            {mode === "trainer" && (
+                              <Button 
+                                variant="destructive" 
+                                size="sm"
+                                onClick={() => handleCancelSession(session.id)}
+                              >
+                                Cancelar
+                              </Button>
+                            )}
+                          </div>
                         </div>
                       );
                     })}
