@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { CalendarCheck, CalendarClock, CalendarDays, Calendar as CalendarIcon } from "lucide-react";
 import { format, isSameDay } from "date-fns";
+import { es } from "date-fns/locale";
 import BookingCalendar from "@/components/BookingCalendar";
 
 const Calendar = () => {
@@ -33,7 +34,7 @@ const Calendar = () => {
             <CalendarIcon className="h-4 w-4" />
             <span>Hoy</span>
           </Button>
-          <Button className="gap-1">
+          <Button variant="green" className="gap-1">
             <CalendarClock className="h-4 w-4" />
             <span>Reservar</span>
           </Button>
@@ -41,12 +42,12 @@ const Calendar = () => {
       </div>
 
       <Tabs defaultValue="bookings" className="space-y-6">
-        <TabsList>
-          <TabsTrigger value="bookings" className="flex items-center gap-1.5">
+        <TabsList className="bg-muted/50">
+          <TabsTrigger value="bookings" className="flex items-center gap-1.5 data-[state=active]:bg-primary data-[state=active]:text-white">
             <CalendarClock className="h-4 w-4" />
             <span>Reservas</span>
           </TabsTrigger>
-          <TabsTrigger value="schedule" className="flex items-center gap-1.5">
+          <TabsTrigger value="schedule" className="flex items-center gap-1.5 data-[state=active]:bg-primary data-[state=active]:text-white">
             <CalendarDays className="h-4 w-4" />
             <span>Horario</span>
           </TabsTrigger>
@@ -66,7 +67,7 @@ const Calendar = () => {
                     Hoy
                   </CardTitle>
                   <span className="text-sm text-muted-foreground">
-                    {format(new Date(), "EEEE, dd 'de' MMMM")}
+                    {format(new Date(), "EEEE, dd 'de' MMMM", { locale: es })}
                   </span>
                 </div>
                 <CardDescription>Sesiones programadas para hoy</CardDescription>
@@ -118,7 +119,7 @@ const Calendar = () => {
                           <div>
                             <div className="font-medium">{client?.name}</div>
                             <div className="text-xs text-muted-foreground">
-                              {format(sessionDate, "EEEE, dd 'de' MMMM")}
+                              {format(sessionDate, "EEEE, dd 'de' MMMM", { locale: es })}
                             </div>
                             <div className="text-sm">
                               {session.startTime} - {session.endTime}
