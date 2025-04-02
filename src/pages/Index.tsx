@@ -37,7 +37,10 @@ const Index = () => {
 
   // Filter sessions to only include upcoming ones
   const upcomingSessions = sessions.filter(
-    (session) => new Date(`${session.date}T${session.startTime}`) > new Date() && session.status === "scheduled"
+    (session) => {
+      const sessionDateTime = new Date(`${session.date}T${session.startTime}`);
+      return sessionDateTime > new Date() && session.status === "scheduled";
+    }
   ).sort((a, b) => {
     return new Date(`${a.date}T${a.startTime}`).getTime() - new Date(`${b.date}T${b.startTime}`).getTime();
   });
@@ -72,14 +75,16 @@ const Index = () => {
     // Client mode dashboard
     const clientData = clients[0]; // Using first client as example
     
-    // Make sure we're filtering by the client ID to get their sessions
-    const clientSessions = sessions.filter(session => 
-      session.clientId === clientData.id && 
-      session.status === "scheduled" && 
-      new Date(`${session.date}T${session.startTime}`) > new Date()
-    ).sort((a, b) => 
-      new Date(`${a.date}T${a.startTime}`).getTime() - new Date(`${b.date}T${b.startTime}`).getTime()
-    );
+    // Get client sessions with future dates
+    const clientSessions = sessions.filter(session => {
+      if (session.clientId !== clientData.id || session.status !== "scheduled") {
+        return false;
+      }
+      const sessionDateTime = new Date(`${session.date}T${session.startTime}`);
+      return sessionDateTime >= new Date();
+    }).sort((a, b) => {
+      return new Date(`${a.date}T${a.startTime}`).getTime() - new Date(`${b.date}T${b.startTime}`).getTime();
+    });
     
     console.log("Client sessions for dashboard:", clientSessions);
     

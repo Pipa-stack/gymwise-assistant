@@ -20,12 +20,15 @@ const Calendar = () => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [activeTab, setActiveTab] = useState("bookings");
   
-  // Sesiones próximas (futuras)
+  // Filter future scheduled sessions
   const upcomingSessions = sessions.filter(
-    session => new Date(session.date) >= new Date() && session.status === "scheduled"
+    session => {
+      const sessionDate = new Date(`${session.date}T${session.startTime}`);
+      return sessionDate >= new Date() && session.status === "scheduled";
+    }
   ).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
-  // Sesiones para hoy
+  // Filter today's sessions
   const todaySessions = sessions.filter(
     session => isSameDay(new Date(session.date), new Date()) && session.status === "scheduled"
   ).sort((a, b) => a.startTime.localeCompare(b.startTime));
@@ -53,11 +56,16 @@ const Calendar = () => {
   // Custom callback for booking completion
   const handleBookingSuccess = () => {
     console.log("Booking success callback triggered");
+    
     // Set session storage to signal that we just booked a session
     sessionStorage.setItem("justBooked", "true");
-    // Navigate to home page to see the booked session
-    console.log("Navigating back to home after successful booking");
-    navigate("/");
+    
+    // Force a slight delay to ensure state is updated before navigation
+    setTimeout(() => {
+      // Navigate to home page to see the booked session
+      console.log("Navigating back to home after successful booking");
+      navigate("/");
+    }, 300);
   };
 
   return (

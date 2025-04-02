@@ -20,7 +20,20 @@ const ClientSessions = ({ sessions }: ClientSessionsProps) => {
   // Make sure we're always using the latest sessions
   useEffect(() => {
     console.log("Sessions received in ClientSessions:", sessions);
-    setDisplaySessions(sessions.filter(session => session.status === "scheduled"));
+    // Only show scheduled future sessions, sorted by date
+    const filteredSessions = sessions
+      .filter(session => {
+        const isScheduled = session.status === "scheduled";
+        const sessionDateTime = new Date(`${session.date}T${session.startTime}`);
+        const isFuture = sessionDateTime >= new Date();
+        return isScheduled && isFuture;
+      })
+      .sort((a, b) => {
+        return new Date(`${a.date}T${a.startTime}`).getTime() - new Date(`${b.date}T${b.startTime}`).getTime();
+      });
+    
+    console.log("Filtered sessions for display:", filteredSessions);
+    setDisplaySessions(filteredSessions);
   }, [sessions]);
   
   // Get days until next session
