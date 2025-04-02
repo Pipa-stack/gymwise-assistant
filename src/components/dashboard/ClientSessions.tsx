@@ -7,6 +7,7 @@ import { format, isToday, differenceInDays } from "date-fns";
 import { es } from "date-fns/locale";
 import { ScheduledSession } from "@/context/AppContext";
 import { toast } from "@/hooks/use-toast";
+import { useEffect, useState } from "react";
 
 interface ClientSessionsProps {
   sessions: ScheduledSession[];
@@ -14,6 +15,12 @@ interface ClientSessionsProps {
 
 const ClientSessions = ({ sessions }: ClientSessionsProps) => {
   const navigate = useNavigate();
+  const [displaySessions, setDisplaySessions] = useState<ScheduledSession[]>([]);
+  
+  // Make sure we're always using the latest sessions
+  useEffect(() => {
+    setDisplaySessions(sessions);
+  }, [sessions]);
   
   // Get days until next session
   const getDaysUntilSession = (sessionDate: string) => {
@@ -43,12 +50,12 @@ const ClientSessions = ({ sessions }: ClientSessionsProps) => {
         <CardDescription>Tus próximas sesiones de entrenamiento programadas</CardDescription>
       </CardHeader>
       <CardContent className="p-4 max-h-[350px] overflow-auto">
-        {sessions.length > 0 ? (
+        {displaySessions.length > 0 ? (
           <div className="space-y-3">
-            {sessions.slice(0, 4).map(session => {
+            {displaySessions.slice(0, 4).map(session => {
               const sessionDate = new Date(session.date);
               const daysUntil = getDaysUntilSession(session.date);
-              const isSessionToday = daysUntil === 0;
+              const isSessionToday = isToday(sessionDate);
               const isTomorrow = daysUntil === 1;
               
               return (

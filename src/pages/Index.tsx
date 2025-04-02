@@ -8,6 +8,7 @@ import { toast } from "@/hooks/use-toast";
 
 const Index = () => {
   const { mode, clients, trainingPlans, sessions, exercises } = useAppContext();
+  const [refreshKey, setRefreshKey] = useState(0);
 
   // Check if we just came from a booking
   useEffect(() => {
@@ -18,6 +19,7 @@ const Index = () => {
         description: "Tu sesión ha sido reservada correctamente. Puedes verla en tu panel."
       });
       sessionStorage.removeItem("justBooked");
+      setRefreshKey(prev => prev + 1); // Force re-render to refresh sessions
     }
   }, []);
 
@@ -67,6 +69,7 @@ const Index = () => {
     
     return (
       <ClientDashboard 
+        key={refreshKey} // Force re-render when we come from booking
         client={clientData}
         clientSessions={clientSessions}
       />

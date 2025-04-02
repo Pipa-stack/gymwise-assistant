@@ -369,18 +369,20 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       status: "scheduled"
     };
     
-    setSessions(prev => [...prev, newSession]);
+    setSessions(prevSessions => [...prevSessions, newSession]);
     
-    if (mode === "client") {
-      setAvailableSlots(prev => 
-        prev.map(s => s.id === slotId ? {...s, isTaken: true} : s)
-      );
-    }
+    setAvailableSlots(prevSlots => 
+      prevSlots.map(s => s.id === slotId ? {...s, isTaken: true} : s)
+    );
+    
+    sessionStorage.setItem("justBooked", "true");
     
     toast({
       title: "Reserva confirmada",
       description: `Sesión reservada para el ${new Date(slot.date).toLocaleDateString('es-ES')} a las ${slot.startTime}`
     });
+    
+    return newSession;
   };
 
   const cancelSession = (sessionId: string) => {
