@@ -12,7 +12,10 @@ const Index = () => {
 
   // Check if we just came from a booking
   useEffect(() => {
+    console.log("Checking for recently booked sessions...");
     const justBooked = sessionStorage.getItem("justBooked");
+    console.log("justBooked flag:", justBooked);
+    
     if (justBooked === "true") {
       toast({
         title: "¡Reserva confirmada!",
@@ -20,6 +23,7 @@ const Index = () => {
       });
       sessionStorage.removeItem("justBooked");
       setRefreshKey(prev => prev + 1); // Force re-render to refresh sessions
+      console.log("Refreshing dashboard after booking");
     }
   }, []);
 
@@ -59,6 +63,8 @@ const Index = () => {
   } else {
     // Client mode dashboard
     const clientData = clients[0]; // Using first client as example
+    
+    // Make sure we're filtering by the client ID to get their sessions
     const clientSessions = sessions.filter(session => 
       session.clientId === clientData.id && 
       session.status === "scheduled" && 
@@ -66,6 +72,8 @@ const Index = () => {
     ).sort((a, b) => 
       new Date(`${a.date}T${a.startTime}`).getTime() - new Date(`${b.date}T${b.startTime}`).getTime()
     );
+    
+    console.log("Client sessions for dashboard:", clientSessions);
     
     return (
       <ClientDashboard 

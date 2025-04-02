@@ -332,8 +332,8 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     
     const existingSessionsCount = sessions.filter(
       s => s.date === slot.date && 
-           s.startTime === slot.startTime &&
-           s.status !== "cancelled"
+         s.startTime === slot.startTime &&
+         s.status !== "cancelled"
     ).length;
     
     const sessionDate = new Date(slot.date);
@@ -369,6 +369,8 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       status: "scheduled"
     };
     
+    console.log("Creating new session:", newSession);
+    
     setSessions(prevSessions => [...prevSessions, newSession]);
     
     setAvailableSlots(prevSlots => 
@@ -382,6 +384,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       description: `Sesión reservada para el ${new Date(slot.date).toLocaleDateString('es-ES')} a las ${slot.startTime}`
     });
     
+    console.log("Session has been booked, returning:", newSession);
     return newSession;
   };
 

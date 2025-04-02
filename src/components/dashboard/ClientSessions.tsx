@@ -19,6 +19,7 @@ const ClientSessions = ({ sessions }: ClientSessionsProps) => {
   
   // Make sure we're always using the latest sessions
   useEffect(() => {
+    console.log("Sessions received in ClientSessions:", sessions);
     setDisplaySessions(sessions);
   }, [sessions]);
   
@@ -50,7 +51,7 @@ const ClientSessions = ({ sessions }: ClientSessionsProps) => {
         <CardDescription>Tus próximas sesiones de entrenamiento programadas</CardDescription>
       </CardHeader>
       <CardContent className="p-4 max-h-[350px] overflow-auto">
-        {displaySessions.length > 0 ? (
+        {displaySessions && displaySessions.length > 0 ? (
           <div className="space-y-3">
             {displaySessions.slice(0, 4).map(session => {
               const sessionDate = new Date(session.date);
