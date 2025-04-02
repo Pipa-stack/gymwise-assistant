@@ -17,6 +17,8 @@ import Calendar from "./pages/Calendar";
 import Stats from "./pages/Stats";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
+import Chat from "./pages/Chat";
+import GymwiseAssistant from "./pages/GymwiseAssistant";
 
 const queryClient = new QueryClient();
 
@@ -40,6 +42,8 @@ const App = () => (
               <Route path="/calendar" element={<Calendar />} />
               <Route path="/stats" element={<Stats />} />
               <Route path="/profile" element={<Profile />} />
+              <Route path="/chat" element={<Chat />} />
+              <Route path="/gymwise-assistant" element={<GymwiseAssistant />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Layout>
