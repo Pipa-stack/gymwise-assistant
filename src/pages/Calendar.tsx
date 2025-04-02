@@ -1,248 +1,105 @@
 
 import { useState } from "react";
 import { useAppContext } from "@/context/AppContext";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import { CalendarCheck, CalendarClock, CalendarDays, Calendar as CalendarIcon } from "lucide-react";
-import { format, isSameDay } from "date-fns";
-import { es } from "date-fns/locale";
 import BookingCalendar from "@/components/BookingCalendar";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Calendar, Clock, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-const Calendar = () => {
-  const { mode, clients, sessions, cancelSession } = useAppContext();
-  const navigate = useNavigate();
-  const [selectedClient, setSelectedClient] = useState<string | undefined>(
+const CalendarPage = () => {
+  const { mode, clients } = useAppContext();
+  const [selectedClientId, setSelectedClientId] = useState<string | undefined>(
     mode === "client" ? clients[0]?.id : undefined
   );
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [activeTab, setActiveTab] = useState("bookings");
+  const navigate = useNavigate();
   
-  // Filter future scheduled sessions
-  const upcomingSessions = sessions.filter(
-    session => {
-      const sessionDate = new Date(`${session.date}T${session.startTime}`);
-      return sessionDate >= new Date() && session.status === "scheduled";
-    }
-  ).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-
-  // Filter today's sessions
-  const todaySessions = sessions.filter(
-    session => isSameDay(new Date(session.date), new Date()) && session.status === "scheduled"
-  ).sort((a, b) => a.startTime.localeCompare(b.startTime));
-
-  const handleSelectClient = (clientId: string) => {
-    setSelectedClient(clientId);
-  };
-  
-  const handleDateChange = (date: Date) => {
-    setSelectedDate(date);
-  };
-  
-  const handleGoToToday = () => {
-    setSelectedDate(new Date());
-  };
-  
-  const handleBookNow = () => {
-    setActiveTab("bookings");
-  };
-  
-  const handleCancelSession = (sessionId: string) => {
-    cancelSession(sessionId);
-  };
-
-  // Custom callback for booking completion
   const handleBookingSuccess = () => {
     console.log("Booking success callback triggered");
     
-    // Set session storage to signal that we just booked a session
+    // Set a flag in sessionStorage to indicate a booking was just made
     sessionStorage.setItem("justBooked", "true");
     
-    // Force a slight delay to ensure state is updated before navigation
+    // Navigate back to the dashboard
+    console.log("Navigating back to home after successful booking");
     setTimeout(() => {
-      // Navigate to home page to see the booked session
-      console.log("Navigating back to home after successful booking");
       navigate("/");
-    }, 300);
+    }, 1000);
   };
-
+  
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <h1 className="text-3xl font-bold tracking-tight">Calendario</h1>
-        <div className="flex items-center gap-2">
-          <Button 
-            variant="outline" 
-            className="gap-1"
-            onClick={handleGoToToday}
-          >
-            <CalendarIcon className="h-4 w-4" />
-            <span>Hoy</span>
-          </Button>
-          <Button 
-            className="gap-1"
-            onClick={handleBookNow}
-          >
-            <CalendarClock className="h-4 w-4" />
-            <span>Reservar</span>
-          </Button>
-        </div>
+      <div className="flex flex-col gap-2">
+        <h2 className="text-3xl font-bold tracking-tight flex items-center">
+          <Calendar className="mr-2 h-6 w-6 text-primary" />
+          Reserva de Sesiones
+        </h2>
+        <p className="text-muted-foreground">
+          Consulta la disponibilidad y reserva tus sesiones de entrenamiento
+        </p>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="bg-muted/50">
-          <TabsTrigger value="bookings" className="flex items-center gap-1.5 data-[state=active]:bg-primary data-[state=active]:text-white">
-            <CalendarClock className="h-4 w-4" />
-            <span>Reservas</span>
-          </TabsTrigger>
-          <TabsTrigger value="schedule" className="flex items-center gap-1.5 data-[state=active]:bg-primary data-[state=active]:text-white">
-            <CalendarDays className="h-4 w-4" />
-            <span>Horario</span>
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="bookings" className="space-y-6">
-          {mode === "trainer" && (
-            <div className="bg-muted/30 p-4 rounded-lg mb-4">
-              <label className="block text-sm font-medium mb-2">Seleccionar cliente:</label>
-              <Select onValueChange={handleSelectClient} value={selectedClient}>
-                <SelectTrigger className="w-full max-w-xs">
-                  <SelectValue placeholder="Seleccionar cliente" />
-                </SelectTrigger>
-                <SelectContent>
-                  {clients.map(client => (
-                    <SelectItem key={client.id} value={client.id}>
-                      {client.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+      {mode === "trainer" && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <Users className="h-5 w-5 mr-2 text-primary" />
+              Selecciona un Cliente
+            </CardTitle>
+            <CardDescription>
+              Selecciona el cliente para el que deseas reservar una sesión
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {clients.map(client => (
+                <button
+                  key={client.id}
+                  onClick={() => setSelectedClientId(client.id)}
+                  className={`p-4 border rounded-lg flex items-center gap-3 transition-colors ${
+                    selectedClientId === client.id 
+                      ? "bg-primary/10 border-primary/30" 
+                      : "hover:bg-accent"
+                  }`}
+                >
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden">
+                    {client.photo ? (
+                      <img src={client.photo} alt={client.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <Users className="h-5 w-5 text-primary" />
+                    )}
+                  </div>
+                  <div className="text-left">
+                    <div className="font-medium">{client.name}</div>
+                    <div className="text-sm text-muted-foreground">
+                      {client.email || "Sin email"}
+                    </div>
+                  </div>
+                </button>
+              ))}
             </div>
-          )}
+          </CardContent>
+        </Card>
+      )}
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <Clock className="h-5 w-5 mr-2 text-primary" />
+            Horarios Disponibles
+          </CardTitle>
+          <CardDescription>
+            Selecciona un horario disponible para tu sesión
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
           <BookingCalendar 
-            clientId={mode === "client" ? clients[0]?.id : selectedClient} 
-            onDateChange={handleDateChange}
+            clientId={selectedClientId} 
             onBookingSuccess={handleBookingSuccess}
           />
-        </TabsContent>
-
-        <TabsContent value="schedule" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle className="flex items-center gap-2">
-                    <CalendarCheck className="h-5 w-5 text-primary" />
-                    Hoy
-                  </CardTitle>
-                  <span className="text-sm text-muted-foreground">
-                    {format(new Date(), "EEEE, dd 'de' MMMM", { locale: es })}
-                  </span>
-                </div>
-                <CardDescription>Sesiones programadas para hoy</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {todaySessions.length > 0 ? (
-                  <div className="space-y-3">
-                    {todaySessions.map(session => {
-                      const client = clients.find(c => c.id === session.clientId);
-                      return (
-                        <div key={session.id} className="p-3 border rounded-lg flex justify-between items-center">
-                          <div>
-                            <div className="font-medium">{client?.name}</div>
-                            <div className="text-sm text-muted-foreground">
-                              {session.startTime} - {session.endTime}
-                            </div>
-                          </div>
-                          <div className="flex gap-2">
-                            <Button variant="outline" size="sm">Ver detalles</Button>
-                            {mode === "trainer" && (
-                              <Button 
-                                variant="destructive" 
-                                size="sm"
-                                onClick={() => handleCancelSession(session.id)}
-                              >
-                                Cancelar
-                              </Button>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center justify-center h-40 text-center">
-                    <CalendarIcon className="h-10 w-10 text-muted-foreground mb-2" />
-                    <p className="text-muted-foreground">No hay sesiones programadas para hoy</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <CalendarClock className="h-5 w-5 text-primary" />
-                  Próximas Sesiones
-                </CardTitle>
-                <CardDescription>Sesiones programadas para los próximos días</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {upcomingSessions.length > 0 ? (
-                  <div className="space-y-3">
-                    {upcomingSessions.slice(0, 5).map(session => {
-                      const client = clients.find(c => c.id === session.clientId);
-                      const sessionDate = new Date(session.date);
-                      
-                      return (
-                        <div key={session.id} className="p-3 border rounded-lg flex justify-between items-center">
-                          <div>
-                            <div className="font-medium">{client?.name}</div>
-                            <div className="text-xs text-muted-foreground">
-                              {format(sessionDate, "EEEE, dd 'de' MMMM", { locale: es })}
-                            </div>
-                            <div className="text-sm">
-                              {session.startTime} - {session.endTime}
-                            </div>
-                          </div>
-                          <div className="flex gap-2">
-                            <Button variant="outline" size="sm">Ver detalles</Button>
-                            {mode === "trainer" && (
-                              <Button 
-                                variant="destructive" 
-                                size="sm"
-                                onClick={() => handleCancelSession(session.id)}
-                              >
-                                Cancelar
-                              </Button>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center justify-center h-40 text-center">
-                    <CalendarClock className="h-10 w-10 text-muted-foreground mb-2" />
-                    <p className="text-muted-foreground">No hay sesiones programadas próximamente</p>
-                  </div>
-                )}
-              </CardContent>
-              {upcomingSessions.length > 5 && (
-                <CardFooter>
-                  <Button variant="ghost" className="w-full">
-                    Ver todas ({upcomingSessions.length})
-                  </Button>
-                </CardFooter>
-              )}
-            </Card>
-          </div>
-        </TabsContent>
-      </Tabs>
+        </CardContent>
+      </Card>
     </div>
   );
 };
 
-export default Calendar;
+export default CalendarPage;

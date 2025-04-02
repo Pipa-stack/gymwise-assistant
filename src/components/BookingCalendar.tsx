@@ -25,7 +25,6 @@ interface BookingCalendarProps {
   onBookingSuccess?: () => void;
 }
 
-// Horarios disponibles por día
 const timeSlotsByDay = {
   1: [ // Lunes
     { id: "lun-1", startTime: "08:00", endTime: "09:30", capacity: 6 },
@@ -82,17 +81,14 @@ const BookingCalendar = ({ clientId, onDateChange, onBookingSuccess }: BookingCa
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
   const navigate = useNavigate();
   
-  // Función para avanzar al siguiente mes
   const nextMonth = () => {
     setCurrentMonth(addMonths(currentMonth, 1));
   };
 
-  // Función para retroceder al mes anterior
   const prevMonth = () => {
     setCurrentMonth(subMonths(currentMonth, 1));
   };
   
-  // Función para ir al día actual
   const goToToday = () => {
     const today = new Date();
     setSelectedDate(today);
@@ -108,7 +104,6 @@ const BookingCalendar = ({ clientId, onDateChange, onBookingSuccess }: BookingCa
     });
   };
   
-  // Obtener sesiones programadas para la fecha seleccionada
   const sessionsForSelectedDate = selectedDate
     ? sessions.filter(session => 
         session.date === selectedDate.toISOString().split('T')[0] && 
@@ -117,7 +112,6 @@ const BookingCalendar = ({ clientId, onDateChange, onBookingSuccess }: BookingCa
       )
     : [];
 
-  // Función para manejar la reserva
   const handleBooking = (slotId: string, startTime: string, endTime: string) => {
     if (clientId) {
       setSelectedSlot(slotId);
@@ -133,17 +127,18 @@ const BookingCalendar = ({ clientId, onDateChange, onBookingSuccess }: BookingCa
     }
   };
 
-  // Función para manejar la cancelación
   const handleCancelBooking = (sessionId: string) => {
     setSelectedSessionId(sessionId);
     setShowCancelModal(true);
   };
 
-  // Función para confirmar la reserva
   const confirmBooking = () => {
     if (clientId && selectedSlot && selectedDate) {
       const dateStr = selectedDate.toISOString().split('T')[0];
-      bookSession(clientId, `${selectedSlot}-${dateStr}`);
+      const fullSlotId = `${selectedSlot}-${dateStr}`;
+      console.log("Booking session with slot ID:", fullSlotId);
+      
+      const booked = bookSession(clientId, fullSlotId);
       setShowReservationModal(false);
       setSelectedSlot(null);
       
@@ -152,19 +147,18 @@ const BookingCalendar = ({ clientId, onDateChange, onBookingSuccess }: BookingCa
         description: `Sesión reservada para el ${format(selectedDate, "dd 'de' MMMM", { locale: es })} de ${selectedStartTime} a ${selectedEndTime}`
       });
       
-      // Call the onBookingSuccess callback if provided
       if (onBookingSuccess) {
+        console.log("Booking success callback triggered");
         onBookingSuccess();
       } else {
-        // Fallback to the original behavior if no callback is provided
+        console.log("Navigating back to home after successful booking");
         setTimeout(() => {
           navigate("/");
-        }, 2000);
+        }, 1000);
       }
     }
   };
   
-  // Función para confirmar la cancelación
   const confirmCancelBooking = () => {
     if (selectedSessionId) {
       cancelSession(selectedSessionId);
@@ -173,23 +167,19 @@ const BookingCalendar = ({ clientId, onDateChange, onBookingSuccess }: BookingCa
     }
   };
 
-  // Función para obtener el nombre del día y fecha en formato legible
   const getFormattedDateHeader = (date: Date) => {
     return `📅 ${format(date, "EEEE d 'de' MMMM, yyyy", { locale: es })}`;
   };
 
-  // Función para determinar si una fecha tiene slots disponibles
   const hasAvailableSlots = (date: Date) => {
     const dayOfWeek = getDay(date);
-    return (dayOfWeek > 0 && dayOfWeek < 6); // Solo Lunes a Viernes
+    return (dayOfWeek > 0 && dayOfWeek < 6);
   };
 
-  // Obtener el número de personas inscritas para un horario específico
   const getSlotOccupancy = (date: Date, slotStartTime: string) => {
     if (!date) return 0;
     const dateStr = date.toISOString().split('T')[0];
     
-    // Contar sesiones para esta fecha y hora de inicio
     return sessions.filter(session => 
       session.date === dateStr && 
       session.startTime === slotStartTime &&
@@ -197,7 +187,6 @@ const BookingCalendar = ({ clientId, onDateChange, onBookingSuccess }: BookingCa
     ).length;
   };
 
-  // Obtener la lista de clientes para un slot específico
   const getClientsInSlot = (date: Date, slotStartTime: string) => {
     if (!date) return [];
     const dateStr = date.toISOString().split('T')[0];
@@ -220,7 +209,6 @@ const BookingCalendar = ({ clientId, onDateChange, onBookingSuccess }: BookingCa
     return sessionClients;
   };
 
-  // Verificar si el cliente ya tiene una reserva en este horario
   const hasExistingBooking = (date: Date, slotStartTime: string) => {
     if (!clientId || !date) return false;
     const dateStr = date.toISOString().split('T')[0];
@@ -235,12 +223,10 @@ const BookingCalendar = ({ clientId, onDateChange, onBookingSuccess }: BookingCa
     return existingSession ? existingSession : false;
   };
 
-  // Obtener los slots para la fecha seleccionada
   const timeSlotsForSelectedDate = selectedDate 
     ? timeSlotsByDay[getDay(selectedDate) as keyof typeof timeSlotsByDay] || []
     : [];
 
-  // Función que se ejecuta cuando cambia la fecha seleccionada
   const handleDateChange = (date: Date) => {
     setSelectedDate(date);
     
@@ -412,7 +398,6 @@ const BookingCalendar = ({ clientId, onDateChange, onBookingSuccess }: BookingCa
                           </div>
                         </div>
                         
-                        {/* Lista de usuarios inscritos */}
                         {clientsInSlot.length > 0 && mode === "trainer" && (
                           <div className="mt-2 pt-2 border-t">
                             <p className="text-xs text-muted-foreground mb-1">Usuarios inscritos:</p>
@@ -442,7 +427,6 @@ const BookingCalendar = ({ clientId, onDateChange, onBookingSuccess }: BookingCa
         )}
       </div>
 
-      {/* Modal de confirmación de reserva */}
       {showReservationModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <Card className="w-full max-w-md animate-in fade-in-0">
@@ -483,7 +467,6 @@ const BookingCalendar = ({ clientId, onDateChange, onBookingSuccess }: BookingCa
         </div>
       )}
       
-      {/* Modal de confirmación de cancelación */}
       {showCancelModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <Card className="w-full max-w-md animate-in fade-in-0">

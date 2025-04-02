@@ -12,28 +12,37 @@ const Index = () => {
 
   // Check if we just came from a booking
   useEffect(() => {
-    console.log("Checking for recently booked sessions...");
-    const justBooked = sessionStorage.getItem("justBooked");
-    const lastBookedSessionId = sessionStorage.getItem("lastBookedSessionId");
-    console.log("justBooked flag:", justBooked);
-    console.log("lastBookedSessionId:", lastBookedSessionId);
-    console.log("Available sessions:", sessions);
-    
-    if (justBooked === "true") {
-      toast({
-        title: "¡Reserva confirmada!",
-        description: "Tu sesión ha sido reservada correctamente. Puedes verla en tu panel."
-      });
+    const checkForNewBookings = () => {
+      console.log("Checking for recently booked sessions...");
+      const justBooked = sessionStorage.getItem("justBooked");
+      const lastBookedSessionId = sessionStorage.getItem("lastBookedSessionId");
+      console.log("justBooked flag:", justBooked);
+      console.log("lastBookedSessionId:", lastBookedSessionId);
+      console.log("Available sessions:", sessions);
       
-      // Clear the flags after processing
-      sessionStorage.removeItem("justBooked");
-      sessionStorage.removeItem("lastBookedSessionId");
-      
-      // Force re-render to refresh sessions
-      setRefreshKey(prev => prev + 1);
-      console.log("Refreshing dashboard after booking with new key:", refreshKey + 1);
-    }
-  }, [sessions]); // Also watch for sessions changes
+      if (justBooked === "true") {
+        toast({
+          title: "¡Reserva confirmada!",
+          description: "Tu sesión ha sido reservada correctamente. Puedes verla en tu panel."
+        });
+        
+        // Clear the flags after processing
+        sessionStorage.removeItem("justBooked");
+        sessionStorage.removeItem("lastBookedSessionId");
+        
+        // Force re-render to refresh sessions
+        setRefreshKey(prev => prev + 1);
+        console.log("Refreshing dashboard after booking with new key:", refreshKey + 1);
+      }
+    };
+
+    // Check immediately when the component mounts
+    checkForNewBookings();
+
+    // Also set up a check whenever sessions change
+    const timer = setTimeout(checkForNewBookings, 500);
+    return () => clearTimeout(timer);
+  }, [sessions, refreshKey]);
 
   // Filter sessions to only include upcoming ones
   const upcomingSessions = sessions.filter(

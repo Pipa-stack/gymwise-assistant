@@ -20,6 +20,7 @@ const ClientSessions = ({ sessions }: ClientSessionsProps) => {
   // Make sure we're always using the latest sessions
   useEffect(() => {
     console.log("Sessions received in ClientSessions:", sessions);
+    
     // Only show scheduled future sessions, sorted by date
     const filteredSessions = sessions
       .filter(session => {
