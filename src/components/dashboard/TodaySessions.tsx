@@ -1,12 +1,13 @@
 
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CalendarClock, Clock, ChevronRight, Calendar, Users } from "lucide-react";
-import { Client, ScheduledSession } from "@/context/AppContext";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { format, isToday } from "date-fns";
+import { Check, Clock, User, X } from "lucide-react";
+import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import { Client, ScheduledSession } from "@/context/AppContext";
+import { useAppContext } from "@/context/AppContext";
 
 interface TodaySessionsProps {
   sessions: ScheduledSession[];
@@ -15,128 +16,116 @@ interface TodaySessionsProps {
 
 const TodaySessions = ({ sessions, clients }: TodaySessionsProps) => {
   const navigate = useNavigate();
+  const { cancelSession } = useAppContext();
+  const [showAll, setShowAll] = useState(false);
   
-  // Get the initials for avatar
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map(part => part[0])
-      .join('')
-      .toUpperCase();
-  };
-
-  // Format time to show "En 30 min" if it's within the hour
-  const getFormattedTimeStatus = (sessionTime: string) => {
-    const [hours, minutes] = sessionTime.split(':').map(Number);
-    const sessionDate = new Date();
-    sessionDate.setHours(hours, minutes, 0);
-    
-    const now = new Date();
-    const diffMs = sessionDate.getTime() - now.getTime();
-    const diffMins = Math.round(diffMs / 60000);
-    
-    if (diffMins > 0 && diffMins < 60) {
-      return `En ${diffMins} min`;
-    }
-    
-    return sessionTime;
+  // Order sessions by time
+  const sortedSessions = [...sessions].sort((a, b) => 
+    a.startTime.localeCompare(b.startTime)
+  );
+  
+  // Only show first 3 sessions unless showAll is true
+  const displayedSessions = showAll 
+    ? sortedSessions 
+    : sortedSessions.slice(0, 3);
+  
+  const handleCancelSession = (e: React.MouseEvent, sessionId: string) => {
+    e.stopPropagation();
+    cancelSession(sessionId);
   };
   
   return (
-    <Card className="md:col-span-5 lg:col-span-8 animate-slide-in-up [animation-delay:600ms] border-none shadow-md bg-white dark:bg-gray-950">
-      <CardHeader className="flex flex-row items-center justify-between bg-gradient-to-r from-primary/20 to-background p-4 rounded-t-lg">
-        <div>
-          <CardTitle className="flex items-center text-xl">
-            <CalendarClock className="h-5 w-5 mr-2 text-primary" />
+    <Card className="md:col-span-4 animate-slide-in-up [animation-delay:300ms]">
+      <CardHeader>
+        <CardTitle className="flex items-center justify-between">
+          <div className="flex items-center">
+            <Clock className="h-5 w-5 mr-2 text-primary" />
             Sesiones de Hoy
-          </CardTitle>
-          <CardDescription>
-            {sessions.length > 0 
-              ? `${sessions.length} sesiones programadas para hoy` 
-              : "No hay sesiones programadas para hoy"}
-          </CardDescription>
-        </div>
-        <Button variant="outline" size="sm" onClick={() => navigate("/calendar")} className="gap-1">
-          <Calendar className="h-4 w-4" />
-          Ver Todas
-        </Button>
+          </div>
+          <span className="text-sm font-normal text-muted-foreground">
+            {format(new Date(), "dd MMM", { locale: es })}
+          </span>
+        </CardTitle>
+        <CardDescription>
+          {sessions.length === 0 
+            ? "No hay sesiones programadas para hoy" 
+            : `${sessions.length} sesión${sessions.length !== 1 ? 'es' : ''} para hoy`}
+        </CardDescription>
       </CardHeader>
-      <CardContent className="p-4 max-h-[450px] overflow-auto">
+      <CardContent>
         {sessions.length > 0 ? (
           <div className="space-y-3">
-            {sessions.map(session => {
+            {displayedSessions.map(session => {
               const client = clients.find(c => c.id === session.clientId);
-              
-              // Format the date for display
-              const sessionDate = new Date(session.date);
-              const formattedDate = format(sessionDate, "EEEE, dd 'de' MMMM", { locale: es });
-              const isUpcoming = isToday(sessionDate);
               
               return (
                 <div 
                   key={session.id} 
-                  className="flex justify-between items-center p-3 border rounded-lg hover:bg-accent/30 transition-all duration-300 group relative overflow-hidden"
+                  className="p-3 border rounded-lg flex justify-between items-center hover:bg-accent/50 transition-colors cursor-pointer"
+                  onClick={() => navigate(`/clients/${session.clientId}`)}
                 >
-                  {isUpcoming && (
-                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary animate-pulse"></div>
-                  )}
                   <div className="flex items-center gap-3">
-                    <Avatar className="h-10 w-10 border-2 border-primary/20 shadow-sm">
-                      <AvatarFallback className="bg-primary/10 text-primary font-medium">
-                        {client && getInitials(client.name)}
-                      </AvatarFallback>
-                    </Avatar>
+                    <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden">
+                      {client?.photo ? (
+                        <img src={client.photo} alt={client?.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <User className="h-5 w-5 text-primary" />
+                      )}
+                    </div>
                     <div>
-                      <p className="font-medium group-hover:text-primary transition-colors">{client?.name}</p>
-                      <div className="flex items-center text-sm text-muted-foreground gap-1">
-                        <Clock className="h-3 w-3" />
-                        <span className={isUpcoming ? "font-medium text-primary" : ""}>
-                          {isUpcoming ? getFormattedTimeStatus(session.startTime) : session.startTime} - {session.endTime}
-                        </span>
+                      <div className="font-medium">{client?.name || "Cliente"}</div>
+                      <div className="text-sm text-muted-foreground">
+                        {session.startTime} - {session.endTime}
                       </div>
                     </div>
                   </div>
-                  <Button 
-                    variant="ghost" 
-                    size="sm"
-                    onClick={() => navigate("/calendar")}
-                    className="opacity-70 group-hover:opacity-100 group-hover:bg-primary/10 transition-all"
-                  >
-                    <span className="mr-1">Detalles</span>
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
+                  <div className="flex gap-1">
+                    <Button 
+                      variant="ghost" 
+                      size="icon"
+                      className="h-8 w-8 text-green-500 hover:text-green-600 hover:bg-green-100"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        // Mark session as completed logic would go here
+                      }}
+                    >
+                      <Check className="h-4 w-4" />
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="icon"
+                      className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-100"
+                      onClick={(e) => handleCancelSession(e, session.id)}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               );
             })}
+            
+            {sessions.length > 3 && (
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="w-full text-xs"
+                onClick={() => setShowAll(!showAll)}
+              >
+                {showAll ? "Mostrar menos" : `Ver todas (${sessions.length})`}
+              </Button>
+            )}
           </div>
         ) : (
-          <div className="flex h-40 items-center justify-center">
-            <div className="text-center">
-              <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-muted/30 flex items-center justify-center">
-                <CalendarClock className="h-8 w-8 text-muted-foreground opacity-70" />
-              </div>
-              <p className="text-muted-foreground">No hay sesiones programadas para hoy</p>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="mt-3"
-                onClick={() => navigate("/calendar")}
-              >
-                <Calendar className="h-4 w-4 mr-2" />
-                Programar Nueva Sesión
-              </Button>
-            </div>
-          </div>
-        )}
-        
-        {sessions.length > 0 && (
-          <div className="mt-4 pt-3 border-t flex justify-between items-center">
-            <div className="flex items-center text-sm text-muted-foreground">
-              <Users className="h-4 w-4 mr-1" />
-              <span>Clientes totales: {clients.length}</span>
-            </div>
-            <Button variant="ghost" size="sm" onClick={() => navigate("/clients")} className="text-xs">
-              Ver todos los clientes
+          <div className="py-8 text-center">
+            <Clock className="h-10 w-10 mx-auto text-muted-foreground opacity-50 mb-2" />
+            <p className="text-muted-foreground">No hay sesiones programadas para hoy</p>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="mt-4"
+              onClick={() => navigate("/calendar")}
+            >
+              Gestionar calendario
             </Button>
           </div>
         )}

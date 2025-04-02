@@ -2,7 +2,7 @@
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, CalendarClock, CalendarCheck, CalendarPlus } from "lucide-react";
+import { ArrowRight, CalendarClock, CalendarCheck, CalendarPlus, Clock } from "lucide-react";
 import { format, isToday, addDays, differenceInDays } from "date-fns";
 import { es } from "date-fns/locale";
 import { ScheduledSession } from "@/context/AppContext";
@@ -36,7 +36,7 @@ const ClientSessions = ({ sessions }: ClientSessionsProps) => {
             {sessions.slice(0, 3).map(session => {
               const sessionDate = new Date(session.date);
               const daysUntil = getDaysUntilSession(session.date);
-              const isToday = daysUntil === 0;
+              const isSessionToday = daysUntil === 0;
               const isTomorrow = daysUntil === 1;
               
               return (
@@ -45,22 +45,31 @@ const ClientSessions = ({ sessions }: ClientSessionsProps) => {
                   className="p-3 border rounded-lg hover:bg-accent/50 transition-colors cursor-pointer relative overflow-hidden"
                   onClick={() => navigate("/calendar")}
                 >
-                  {(isToday || isTomorrow) && (
+                  {(isSessionToday || isTomorrow) && (
                     <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary animate-pulse"></div>
                   )}
-                  <div className="flex items-center gap-2 mb-1">
-                    <CalendarClock className={`h-4 w-4 ${isToday ? "text-primary" : "text-muted-foreground"}`} />
-                    <p className={`font-medium text-sm ${isToday ? "text-primary" : ""}`}>
-                      {isToday && "Hoy"}
-                      {isTomorrow && "Mañana"}
-                      {!isToday && !isTomorrow && format(sessionDate, "EEEE, dd 'de' MMMM", { locale: es })}
-                    </p>
-                  </div>
-                  <div className="ml-6 text-sm text-muted-foreground font-medium">
-                    {session.startTime} - {session.endTime}
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <CalendarClock className={`h-4 w-4 ${isSessionToday ? "text-primary" : "text-muted-foreground"}`} />
+                        <p className={`font-medium text-sm ${isSessionToday ? "text-primary" : ""}`}>
+                          {isSessionToday && "Hoy"}
+                          {isTomorrow && "Mañana"}
+                          {!isSessionToday && !isTomorrow && format(sessionDate, "EEEE, dd 'de' MMMM", { locale: es })}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-1 ml-6 text-sm text-muted-foreground font-medium">
+                        <Clock className="h-3 w-3" />
+                        {session.startTime} - {session.endTime}
+                      </div>
+                    </div>
+                    
+                    <div className="px-2 py-1 rounded-full bg-primary/10 text-primary text-xs">
+                      Reservado
+                    </div>
                   </div>
                   
-                  {isToday && (
+                  {isSessionToday && (
                     <div className="mt-2 ml-6 text-xs px-2 py-1 bg-primary/10 text-primary rounded-full inline-block">
                       ¡Hoy! Prepárate para tu sesión
                     </div>

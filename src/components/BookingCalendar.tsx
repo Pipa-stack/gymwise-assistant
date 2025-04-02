@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { useAppContext } from "@/context/AppContext";
-import { format, isSameDay, isToday, addMonths, getDay, subMonths } from "date-fns";
+import { format, isSameDay, isToday, addMonths, getDay, subMonths, differenceInDays } from "date-fns";
 import { es } from "date-fns/locale";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,10 +13,12 @@ import {
   ChevronLeft,
   ChevronRight,
   Users,
-  X
+  X,
+  User
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 interface BookingCalendarProps {
   clientId?: string;
@@ -79,6 +81,7 @@ const BookingCalendar = ({ clientId, onDateChange }: BookingCalendarProps) => {
   const [selectedEndTime, setSelectedEndTime] = useState<string | null>(null);
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
+  const navigate = useNavigate();
   
   // Función para avanzar al siguiente mes
   const nextMonth = () => {
@@ -149,6 +152,11 @@ const BookingCalendar = ({ clientId, onDateChange }: BookingCalendarProps) => {
         title: "Reserva confirmada",
         description: `Sesión reservada para el ${format(selectedDate, "dd 'de' MMMM", { locale: es })} de ${selectedStartTime} a ${selectedEndTime}`
       });
+      
+      // Redirigir a inicio después de la reserva
+      setTimeout(() => {
+        navigate("/");
+      }, 2000);
     }
   };
   
@@ -183,6 +191,29 @@ const BookingCalendar = ({ clientId, onDateChange }: BookingCalendarProps) => {
       session.startTime === slotStartTime &&
       session.status !== "cancelled"
     ).length;
+  };
+
+  // Obtener la lista de clientes para un slot específico
+  const getClientsInSlot = (date: Date, slotStartTime: string) => {
+    if (!date) return [];
+    const dateStr = date.toISOString().split('T')[0];
+    
+    const sessionClients = sessions
+      .filter(session => 
+        session.date === dateStr && 
+        session.startTime === slotStartTime &&
+        session.status !== "cancelled"
+      )
+      .map(session => {
+        const client = clients.find(c => c.id === session.clientId);
+        return {
+          name: client?.name || "Cliente",
+          id: session.clientId,
+          sessionId: session.id
+        };
+      });
+    
+    return sessionClients;
   };
 
   // Verificar si el cliente ya tiene una reserva en este horario
@@ -250,7 +281,7 @@ const BookingCalendar = ({ clientId, onDateChange }: BookingCalendarProps) => {
           
           <CardContent className="pt-0">
             <div className="flex overflow-x-auto pb-2 -mx-1 px-1">
-              {Array.from({ length: 10 }, (_, i) => {
+              {Array.from({ length: 14 }, (_, i) => {
                 const date = new Date();
                 date.setDate(date.getDate() + i);
                 const isAvailable = hasAvailableSlots(date);
@@ -316,63 +347,81 @@ const BookingCalendar = ({ clientId, onDateChange }: BookingCalendarProps) => {
                     const isFullyBooked = occupancy >= slot.capacity;
                     const existingBooking = hasExistingBooking(selectedDate, slot.startTime);
                     const isBooked = Boolean(existingBooking);
+                    const clientsInSlot = getClientsInSlot(selectedDate, slot.startTime);
                     
                     return (
                       <div 
                         key={slot.id}
                         className={cn(
-                          "p-4 border rounded-lg flex justify-between items-center",
+                          "p-4 border rounded-lg",
                           isBooked ? "bg-primary/10 border-primary/30" : "",
                           isFullyBooked && !isBooked ? "opacity-60" : ""
                         )}
                       >
-                        <div className="flex items-center gap-3">
-                          <div className="bg-muted rounded-full p-2">
-                            <Clock className="h-5 w-5" />
+                        <div className="flex justify-between items-center mb-2">
+                          <div className="flex items-center gap-3">
+                            <div className="bg-muted rounded-full p-2">
+                              <Clock className="h-5 w-5" />
+                            </div>
+                            <div>
+                              <div className="font-medium">{slot.startTime} – {slot.endTime}</div>
+                              <div className={cn(
+                                "text-sm flex items-center gap-1",
+                                occupancy === slot.capacity ? "text-red-500" : 
+                                occupancy > slot.capacity / 2 ? "text-amber-500" : 
+                                "text-green-500"
+                              )}>
+                                <Users className="h-3 w-3" />
+                                <span>({occupancy}/{slot.capacity})</span>
+                              </div>
+                            </div>
                           </div>
                           <div>
-                            <div className="font-medium">{slot.startTime} – {slot.endTime}</div>
-                            <div className={cn(
-                              "text-sm flex items-center gap-1",
-                              occupancy === slot.capacity ? "text-red-500" : 
-                              occupancy > slot.capacity / 2 ? "text-amber-500" : 
-                              "text-green-500"
-                            )}>
-                              <Users className="h-3 w-3" />
-                              <span>({occupancy}/{slot.capacity})</span>
-                            </div>
+                            {isBooked ? (
+                              <div className="flex gap-2">
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  className="border-primary/30 text-primary"
+                                >
+                                  <CheckCircle className="h-4 w-4 mr-1" />
+                                  Reservado
+                                </Button>
+                                <Button 
+                                  variant="destructive" 
+                                  size="sm"
+                                  onClick={() => existingBooking && handleCancelBooking(existingBooking.id)}
+                                >
+                                  <X className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            ) : (
+                              <Button
+                                size="sm"
+                                disabled={isFullyBooked}
+                                onClick={() => handleBooking(slot.id, slot.startTime, slot.endTime)}
+                                className={isFullyBooked ? "opacity-50" : ""}
+                              >
+                                {isFullyBooked ? "Completo" : "Reservar"}
+                              </Button>
+                            )}
                           </div>
                         </div>
-                        <div>
-                          {isBooked ? (
-                            <div className="flex gap-2">
-                              <Button 
-                                variant="outline" 
-                                size="sm"
-                                className="border-primary/30 text-primary"
-                              >
-                                <CheckCircle className="h-4 w-4 mr-1" />
-                                Reservado
-                              </Button>
-                              <Button 
-                                variant="destructive" 
-                                size="sm"
-                                onClick={() => existingBooking && handleCancelBooking(existingBooking.id)}
-                              >
-                                <X className="h-4 w-4" />
-                              </Button>
+                        
+                        {/* Lista de usuarios inscritos */}
+                        {clientsInSlot.length > 0 && mode === "trainer" && (
+                          <div className="mt-2 pt-2 border-t">
+                            <p className="text-xs text-muted-foreground mb-1">Usuarios inscritos:</p>
+                            <div className="flex flex-wrap gap-1">
+                              {clientsInSlot.map((client, idx) => (
+                                <div key={idx} className="flex items-center bg-primary/5 px-2 py-1 rounded-full text-xs">
+                                  <User className="h-3 w-3 mr-1 text-primary" />
+                                  <span className="text-primary">{client.name}</span>
+                                </div>
+                              ))}
                             </div>
-                          ) : (
-                            <Button
-                              size="sm"
-                              disabled={isFullyBooked}
-                              onClick={() => handleBooking(slot.id, slot.startTime, slot.endTime)}
-                              className={isFullyBooked ? "opacity-50" : ""}
-                            >
-                              {isFullyBooked ? "Completo" : "Reservar"}
-                            </Button>
-                          )}
-                        </div>
+                          </div>
+                        )}
                       </div>
                     );
                   })}

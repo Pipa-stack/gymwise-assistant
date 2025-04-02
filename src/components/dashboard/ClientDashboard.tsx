@@ -3,11 +3,13 @@ import { Client, ScheduledSession } from "@/context/AppContext";
 import { ClientStatsCards } from "./StatsCards";
 import ClientSessions from "./ClientSessions";
 import ClientProgress from "./ClientProgress";
-import { format } from "date-fns";
+import { format, differenceInDays } from "date-fns";
 import { es } from "date-fns/locale";
 import { CalendarCheck, TrendingUp, Flame, BarChart2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { Card, CardContent } from "@/components/ui/card";
+import { toast } from "@/hooks/use-toast";
 
 interface ClientDashboardProps {
   client: Client;
@@ -25,6 +27,19 @@ const ClientDashboard = ({ client, clientSessions }: ClientDashboardProps) => {
     ? Math.min(Math.round((client.progress.length / 10) * 100), 100) 
     : 0;
   
+  // Handle booking button click
+  const handleBookSession = () => {
+    navigate("/calendar");
+    
+    // Display a toast to guide the user
+    setTimeout(() => {
+      toast({
+        title: "Reserva una sesión",
+        description: "Selecciona una fecha y horario disponible para tu próxima sesión"
+      });
+    }, 300);
+  };
+  
   return (
     <div className="space-y-8 animate-fade-in">
       {/* Hero Section with progress */}
@@ -39,7 +54,7 @@ const ClientDashboard = ({ client, clientSessions }: ClientDashboardProps) => {
               Bienvenido a tu panel personal. Llevas {trainingDays} días entrenando con nosotros. ¡Sigue así!
             </p>
             <div className="flex gap-2 pt-3">
-              <Button onClick={() => navigate("/calendar")} className="rounded-lg text-sm h-9">
+              <Button onClick={handleBookSession} className="rounded-lg text-sm h-9">
                 <CalendarCheck className="mr-2 h-4 w-4" />
                 Reservar Sesión
               </Button>
@@ -68,6 +83,31 @@ const ClientDashboard = ({ client, clientSessions }: ClientDashboardProps) => {
           </div>
         </div>
       </div>
+
+      {/* Destacar la próxima sesión si existe */}
+      {nextClientSession && (
+        <Card className="border-primary/20 shadow-md bg-gradient-to-r from-primary/5 to-transparent">
+          <CardContent className="p-4">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-primary/10 rounded-full">
+                  <CalendarCheck className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold">Tu próxima sesión</h3>
+                  <p className="text-sm text-muted-foreground">
+                    {format(new Date(nextClientSession.date), "EEEE, dd 'de' MMMM", { locale: es })} • 
+                    <span className="font-medium text-primary"> {nextClientSession.startTime} - {nextClientSession.endTime}</span>
+                  </p>
+                </div>
+              </div>
+              <Button variant="outline" onClick={() => navigate("/calendar")} className="shrink-0">
+                Ver calendario
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <ClientStatsCards 
         nextSessionDate={nextClientSession ? 
