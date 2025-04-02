@@ -14,18 +14,26 @@ const Index = () => {
   useEffect(() => {
     console.log("Checking for recently booked sessions...");
     const justBooked = sessionStorage.getItem("justBooked");
+    const lastBookedSessionId = sessionStorage.getItem("lastBookedSessionId");
     console.log("justBooked flag:", justBooked);
+    console.log("lastBookedSessionId:", lastBookedSessionId);
+    console.log("Available sessions:", sessions);
     
     if (justBooked === "true") {
       toast({
         title: "¡Reserva confirmada!",
         description: "Tu sesión ha sido reservada correctamente. Puedes verla en tu panel."
       });
+      
+      // Clear the flags after processing
       sessionStorage.removeItem("justBooked");
-      setRefreshKey(prev => prev + 1); // Force re-render to refresh sessions
-      console.log("Refreshing dashboard after booking");
+      sessionStorage.removeItem("lastBookedSessionId");
+      
+      // Force re-render to refresh sessions
+      setRefreshKey(prev => prev + 1);
+      console.log("Refreshing dashboard after booking with new key:", refreshKey + 1);
     }
-  }, []);
+  }, [sessions]); // Also watch for sessions changes
 
   // Filter sessions to only include upcoming ones
   const upcomingSessions = sessions.filter(

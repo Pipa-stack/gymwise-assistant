@@ -72,13 +72,23 @@ export const bookSession = (
   
   console.log("Creating new session:", newSession);
   
-  setSessions(prevSessions => [...prevSessions, newSession]);
+  // Update sessions in state - use callback to ensure we have the latest state
+  setSessions(prevSessions => {
+    console.log("Previous sessions:", prevSessions);
+    const updatedSessions = [...prevSessions, newSession];
+    console.log("Updated sessions:", updatedSessions);
+    return updatedSessions;
+  });
   
+  // Mark slot as taken
   setAvailableSlots(prevSlots => 
     prevSlots.map(s => s.id === slotId ? {...s, isTaken: true} : s)
   );
   
+  // Set flag for successful booking - this will trigger UI updates
   sessionStorage.setItem("justBooked", "true");
+  // Also store the session ID to help with debugging
+  sessionStorage.setItem("lastBookedSessionId", newSession.id);
   
   toast({
     title: "Reserva confirmada",
@@ -111,7 +121,7 @@ export const cancelSession = (
     prev.map(s => s.id === sessionId ? {...s, status: "cancelled"} : s)
   );
   
-  const slotId = `slot-${session.date}-${parseInt(session.startTime.split(':')[0])}`;
+  const slotId = `slot-${session.date}-${session.startTime.split(':')[0]}`;
   setAvailableSlots(prev => 
     prev.map(s => s.id === slotId ? {...s, isTaken: false} : s)
   );

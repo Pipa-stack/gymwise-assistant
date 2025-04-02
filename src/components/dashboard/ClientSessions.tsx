@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, CalendarClock, CalendarCheck, CalendarPlus, Clock, Users } from "lucide-react";
 import { format, isToday, differenceInDays } from "date-fns";
 import { es } from "date-fns/locale";
-import { ScheduledSession } from "@/context/AppContext";
+import { ScheduledSession } from "@/types/contextTypes";
 import { toast } from "@/hooks/use-toast";
 import { useEffect, useState } from "react";
 
@@ -20,7 +20,7 @@ const ClientSessions = ({ sessions }: ClientSessionsProps) => {
   // Make sure we're always using the latest sessions
   useEffect(() => {
     console.log("Sessions received in ClientSessions:", sessions);
-    setDisplaySessions(sessions);
+    setDisplaySessions(sessions.filter(session => session.status === "scheduled"));
   }, [sessions]);
   
   // Get days until next session

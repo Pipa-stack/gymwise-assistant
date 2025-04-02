@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useAppContext } from "@/context/AppContext";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -51,9 +52,11 @@ const Calendar = () => {
 
   // Custom callback for booking completion
   const handleBookingSuccess = () => {
+    console.log("Booking success callback triggered");
     // Set session storage to signal that we just booked a session
     sessionStorage.setItem("justBooked", "true");
     // Navigate to home page to see the booked session
+    console.log("Navigating back to home after successful booking");
     navigate("/");
   };
 
