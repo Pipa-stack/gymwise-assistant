@@ -4,7 +4,8 @@ import { useAppContext } from "@/context/AppContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { Dumbbell, CheckCircle, Clock } from "lucide-react";
+import { Dumbbell, CheckCircle2, Clock, ArrowRight, Calendar } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface WorkoutTrackerProps {
   clientId: string;
@@ -48,51 +49,63 @@ const WorkoutTracker = ({ clientId, trainingPlanId }: WorkoutTrackerProps) => {
     );
   }
   
+  const nextWorkouts = activePlan.workouts.slice(completedWorkouts, completedWorkouts + 3);
+  
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-base flex items-center gap-2">
-          <Dumbbell className="h-5 w-5 text-primary" />
-          Progreso de Plan: {activePlan.name}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          <div>
-            <div className="flex justify-between mb-1">
-              <span className="text-sm font-medium">{completedWorkouts} de {totalWorkouts} entrenamientos</span>
-              <span className="text-sm font-medium">{progressPercentage}%</span>
-            </div>
-            <Progress value={progressPercentage} className="h-2" />
+    <Card className="overflow-hidden">
+      <CardHeader className="space-y-4 pb-6 bg-gradient-to-r from-primary/10 to-primary/5">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-xl flex items-center gap-2">
+            <Dumbbell className="h-5 w-5 text-primary" />
+            {activePlan.name}
+          </CardTitle>
+          <Badge variant="outline" className="bg-primary/10">
+            {activePlan.goal}
+          </Badge>
+        </div>
+        <div className="space-y-2">
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">Progreso del plan</span>
+            <span className="font-medium">{progressPercentage}%</span>
           </div>
-          
-          <div className="space-y-3">
-            {activePlan.workouts.slice(0, 3).map((workout, index) => (
-              <div key={workout.id} className="flex items-center justify-between p-2 border rounded-md">
-                <div className="flex items-center gap-2">
-                  {clientSessions.length > index ? (
-                    <CheckCircle className="h-5 w-5 text-green-500" />
-                  ) : (
-                    <Clock className="h-5 w-5 text-muted-foreground" />
-                  )}
-                  <div>
-                    <div className="font-medium text-sm">{workout.name}</div>
-                    <div className="text-xs text-muted-foreground">Día {workout.day}</div>
-                  </div>
+          <Progress value={progressPercentage} className="h-2" />
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Calendar className="h-4 w-4" />
+            <span>{completedWorkouts} de {totalWorkouts} entrenamientos completados</span>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent className="p-0">
+        <ScrollArea className="h-[300px]">
+          <div className="p-4 space-y-3">
+            {nextWorkouts.map((workout, index) => (
+              <div 
+                key={workout.id}
+                className="flex items-center gap-4 p-3 rounded-lg bg-accent/5 hover:bg-accent/10 transition-colors"
+              >
+                <div className="bg-primary/90 text-primary-foreground rounded-lg w-12 h-12 flex items-center justify-center shrink-0 shadow-sm">
+                  <Clock className="h-6 w-6" />
                 </div>
-                <Badge variant={clientSessions.length > index ? "default" : "outline"}>
-                  {clientSessions.length > index ? "Completado" : "Pendiente"}
-                </Badge>
+                <div className="flex-1 min-w-0">
+                  <h4 className="font-medium text-sm">Día {workout.day}</h4>
+                  <p className="text-muted-foreground text-sm truncate">{workout.name}</p>
+                </div>
+                {index === 0 ? (
+                  <Badge className="bg-primary text-primary-foreground">Siguiente</Badge>
+                ) : (
+                  <ArrowRight className="h-5 w-5 text-muted-foreground" />
+                )}
               </div>
             ))}
-            
-            {activePlan.workouts.length > 3 && (
-              <div className="text-center text-sm text-muted-foreground">
-                +{activePlan.workouts.length - 3} más
+
+            {nextWorkouts.length === 0 && (
+              <div className="flex flex-col items-center justify-center py-8 text-center">
+                <CheckCircle2 className="h-12 w-12 text-primary mb-3" />
+                <p className="text-muted-foreground">¡Has completado todos los entrenamientos!</p>
               </div>
             )}
           </div>
-        </div>
+        </ScrollArea>
       </CardContent>
     </Card>
   );

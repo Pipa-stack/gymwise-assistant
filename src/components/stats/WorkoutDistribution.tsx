@@ -15,7 +15,7 @@ const COLORS = ["#3b82f6", "#ef4444", "#10b981", "#f59e0b", "#8b5cf6"];
 
 const WorkoutDistribution = () => {
   return (
-    <Card>
+    <Card className="hover:shadow-lg transition-all duration-300">
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <CardTitle className="text-sm font-medium flex items-center gap-2">
           <PieChartIcon className="h-4 w-4 text-primary" />
@@ -36,7 +36,11 @@ const WorkoutDistribution = () => {
                 dataKey="value"
               >
                 {data.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  <Cell 
+                    key={`cell-${index}`} 
+                    fill={COLORS[index % COLORS.length]}
+                    className="hover:opacity-80 transition-opacity"
+                  />
                 ))}
               </Pie>
               <Tooltip 
@@ -52,7 +56,11 @@ const WorkoutDistribution = () => {
                   return null;
                 }}
               />
-              <Legend />
+              <Legend 
+                verticalAlign="bottom" 
+                height={36}
+                formatter={(value) => <span className="text-sm">{value}</span>}
+              />
             </PieChart>
           </ResponsiveContainer>
         </div>
