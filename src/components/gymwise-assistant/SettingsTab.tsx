@@ -1,8 +1,10 @@
 
-import { Code, Settings } from "lucide-react";
+import { Settings, Globe, Brain, Database, Code, Trash2, Download, BrainCircuit } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
+import { Badge } from "@/components/ui/badge";
 
 type SettingsTabProps = {
   selectedLanguage: "es" | "en";
@@ -11,63 +13,86 @@ type SettingsTabProps = {
 
 export const SettingsTab = ({ selectedLanguage, setSelectedLanguage }: SettingsTabProps) => {
   return (
-    <Card>
+    <Card className="bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <CardHeader>
-        <CardTitle className="flex items-center">
-          <Settings className="h-5 w-5 mr-2 text-primary" />
+        <CardTitle className="flex items-center gap-2">
+          <Settings className="h-6 w-6 text-primary" />
           Configuración
         </CardTitle>
         <CardDescription>
           Personaliza tu experiencia con el asistente
         </CardDescription>
       </CardHeader>
+      
       <CardContent className="space-y-6">
-        <div>
-          <h3 className="text-md font-medium mb-4">Idioma preferido</h3>
-          <div className="flex space-x-2">
+        <div className="space-y-4">
+          <h3 className="text-lg font-medium flex items-center gap-2">
+            <Globe className="h-5 w-5 text-primary" />
+            Idioma preferido
+          </h3>
+          <div className="flex flex-wrap gap-2">
             <Button 
-              variant="outline"
-              className={selectedLanguage === "es" ? "bg-primary/10" : ""}
+              variant={selectedLanguage === "es" ? "default" : "outline"}
               onClick={() => setSelectedLanguage("es")}
+              className="min-w-[120px]"
             >
-              Español
+              <span className="mr-2">🇪🇸</span> Español
             </Button>
             <Button 
-              variant="outline"
-              className={selectedLanguage === "en" ? "bg-primary/10" : ""}
+              variant={selectedLanguage === "en" ? "default" : "outline"}
               onClick={() => setSelectedLanguage("en")}
+              className="min-w-[120px]"
             >
-              English
+              <span className="mr-2">🇬🇧</span> English
             </Button>
           </div>
         </div>
         
         <Separator />
         
-        <div>
-          <h3 className="text-md font-medium mb-4">Modelo de IA</h3>
-          <div className="flex space-x-2">
-            <Button variant="outline" className="bg-primary/10">
-              En la nube
-            </Button>
-            <Button variant="outline" disabled>
-              Local (próximamente)
-            </Button>
+        <div className="space-y-4">
+          <h3 className="text-lg font-medium flex items-center gap-2">
+            <Brain className="h-5 w-5 text-primary" />
+            Modelo de IA
+          </h3>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <div className="font-medium">Modelo en la nube</div>
+                <div className="text-sm text-muted-foreground">
+                  Procesamiento rápido con última versión
+                </div>
+              </div>
+              <Switch checked={true} />
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <div className="font-medium">Modelo local
+                  <Badge variant="outline" className="ml-2">Próximamente</Badge>
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  Procesa localmente para mayor privacidad
+                </div>
+              </div>
+              <Switch disabled />
+            </div>
           </div>
-          <p className="text-sm text-muted-foreground mt-2">
-            El modo local permitirá ejecutar modelos de IA en tu dispositivo para mayor privacidad
-          </p>
         </div>
         
         <Separator />
         
-        <div>
-          <h3 className="text-md font-medium mb-4">Persistencia de datos</h3>
-          <div className="flex items-center space-x-2">
-            <Button variant="destructive" size="sm">
+        <div className="space-y-4">
+          <h3 className="text-lg font-medium flex items-center gap-2">
+            <Database className="h-5 w-5 text-primary" />
+            Datos y privacidad
+          </h3>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="destructive" size="sm" className="gap-2">
+              <Trash2 className="h-4 w-4" />
               Limpiar historial
             </Button>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" className="gap-2">
+              <Download className="h-4 w-4" />
               Exportar datos
             </Button>
           </div>
@@ -75,17 +100,31 @@ export const SettingsTab = ({ selectedLanguage, setSelectedLanguage }: SettingsT
         
         <Separator />
         
-        <div>
-          <h3 className="text-md font-medium mb-4">Desarrollo</h3>
-          <div className="flex items-center space-x-2">
-            <Button variant="outline" size="sm" className="flex items-center">
-              <Code className="h-4 w-4 mr-2" />
-              Modo desarrollador
-            </Button>
+        <div className="space-y-4">
+          <h3 className="text-lg font-medium flex items-center gap-2">
+            <BrainCircuit className="h-5 w-5 text-primary" />
+            Personalización avanzada
+          </h3>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <div className="font-medium">Sugerencias proactivas</div>
+                <div className="text-sm text-muted-foreground">
+                  El asistente sugiere ejercicios basados en tu historial
+                </div>
+              </div>
+              <Switch defaultChecked />
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <div className="font-medium">Modo desarrollador</div>
+                <div className="text-sm text-muted-foreground">
+                  Accede a funciones experimentales
+                </div>
+              </div>
+              <Switch />
+            </div>
           </div>
-          <p className="text-sm text-muted-foreground mt-2">
-            Activa opciones avanzadas para personalizar y extender el asistente
-          </p>
         </div>
       </CardContent>
     </Card>

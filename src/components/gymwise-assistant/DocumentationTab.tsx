@@ -1,56 +1,68 @@
-
 import { useState } from "react";
-import { Code, Info } from "lucide-react";
+import { Brain, Code, Dumbbell, Info, Scale } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 
-type DocView = "overview" | "technical" | "usage";
+type DocView = "overview" | "exercises" | "nutrition" | "technical";
 
 export const DocumentationTab = () => {
   const [docView, setDocView] = useState<DocView>("overview");
   
   return (
-    <Card>
+    <Card className="bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center">
-            <Info className="h-5 w-5 mr-2 text-primary" />
+          <CardTitle className="flex items-center gap-2">
+            <Info className="h-6 w-6 text-primary" />
             Documentación
           </CardTitle>
-          <div className="flex space-x-2">
+          <div className="flex gap-2">
             <Button 
-              variant="outline" 
+              variant={docView === "overview" ? "default" : "outline"} 
               size="sm"
-              className={docView === "overview" ? "bg-primary/10" : ""}
               onClick={() => setDocView("overview")}
+              className="gap-2"
             >
+              <Brain className="h-4 w-4" />
               Visión General
             </Button>
             <Button 
-              variant="outline" 
+              variant={docView === "exercises" ? "default" : "outline"} 
               size="sm"
-              className={docView === "usage" ? "bg-primary/10" : ""}
-              onClick={() => setDocView("usage")}
+              onClick={() => setDocView("exercises")}
+              className="gap-2"
             >
-              Uso
+              <Dumbbell className="h-4 w-4" />
+              Ejercicios
             </Button>
             <Button 
-              variant="outline" 
+              variant={docView === "nutrition" ? "default" : "outline"} 
               size="sm"
-              className={docView === "technical" ? "bg-primary/10" : ""}
-              onClick={() => setDocView("technical")}
+              onClick={() => setDocView("nutrition")}
+              className="gap-2"
             >
+              <Scale className="h-4 w-4" />
+              Nutrición
+            </Button>
+            <Button 
+              variant={docView === "technical" ? "default" : "outline"} 
+              size="sm"
+              onClick={() => setDocView("technical")}
+              className="gap-2"
+            >
+              <Code className="h-4 w-4" />
               Técnico
             </Button>
           </div>
         </div>
       </CardHeader>
       <CardContent>
-        <ScrollArea className="h-[50vh]">
+        <ScrollArea className="h-[60vh]">
           {docView === "overview" && <OverviewContent />}
-          {docView === "usage" && <UsageContent />}
+          {docView === "exercises" && <ExercisesContent />}
+          {docView === "nutrition" && <NutritionContent />}
           {docView === "technical" && <TechnicalContent />}
         </ScrollArea>
       </CardContent>
@@ -59,61 +71,100 @@ export const DocumentationTab = () => {
 };
 
 const OverviewContent = () => (
-  <div className="space-y-4">
+  <div className="space-y-6">
     <div>
-      <h3 className="text-lg font-semibold mb-2">GymWise Assistant</h3>
-      <p>Un asistente de IA especializado para el contexto de gimnasios y entrenamiento físico, diseñado para ayudar tanto a entrenadores como a clientes.</p>
+      <h3 className="text-xl font-semibold mb-3">GymWise Assistant</h3>
+      <p className="text-muted-foreground">
+        Un asistente de IA especializado para el contexto de gimnasios y entrenamiento físico, 
+        diseñado para ayudar tanto a entrenadores como a clientes.
+      </p>
     </div>
     
-    <div>
-      <h3 className="text-lg font-semibold mb-2">Características principales</h3>
-      <ul className="list-disc pl-6 space-y-2">
-        <li>Interfaz de chat intuitiva para consultas sobre entrenamiento y nutrición</li>
-        <li>Soporte multilingüe (Español e Inglés)</li>
-        <li>Persistencia de datos para personalizar la experiencia</li>
-        <li>Diseño modular para fácil extensibilidad</li>
-        <li>Integración con planes de entrenamiento existentes</li>
-      </ul>
-    </div>
-    
-    <div>
-      <h3 className="text-lg font-semibold mb-2">Beneficios</h3>
-      <ul className="list-disc pl-6 space-y-2">
-        <li>Respuestas instantáneas a dudas comunes sobre fitness</li>
-        <li>Seguimiento personalizado del progreso</li>
-        <li>Sugerencias adaptadas al historial y objetivos del usuario</li>
-        <li>Acceso a conocimiento especializado en formato conversacional</li>
-      </ul>
+    <div className="grid gap-4 md:grid-cols-2">
+      <Card className="p-4">
+        <h4 className="font-semibold mb-2">Características principales</h4>
+        <ul className="space-y-2 text-sm text-muted-foreground">
+          <li className="flex items-center gap-2">
+            <Badge variant="outline">✓</Badge>
+            Interfaz de chat intuitiva
+          </li>
+          <li className="flex items-center gap-2">
+            <Badge variant="outline">✓</Badge>
+            Soporte multilingüe
+          </li>
+          <li className="flex items-center gap-2">
+            <Badge variant="outline">✓</Badge>
+            Persistencia de datos
+          </li>
+        </ul>
+      </Card>
+      
+      <Card className="p-4">
+        <h4 className="font-semibold mb-2">Beneficios</h4>
+        <ul className="space-y-2 text-sm text-muted-foreground">
+          <li className="flex items-center gap-2">
+            <Badge variant="outline">✓</Badge>
+            Respuestas instantáneas
+          </li>
+          <li className="flex items-center gap-2">
+            <Badge variant="outline">✓</Badge>
+            Seguimiento personalizado
+          </li>
+          <li className="flex items-center gap-2">
+            <Badge variant="outline">✓</Badge>
+            Sugerencias adaptadas
+          </li>
+        </ul>
+      </Card>
     </div>
   </div>
 );
 
-const UsageContent = () => (
-  <div className="space-y-4">
+const ExercisesContent = () => (
+  <div className="space-y-6">
     <div>
-      <h3 className="text-lg font-semibold mb-2">Guía de uso</h3>
-      <p>El GymWise Assistant está diseñado para ser intuitivo y fácil de usar.</p>
+      <h3 className="text-xl font-semibold mb-3">Base de Ejercicios</h3>
+      <p className="text-muted-foreground mb-4">
+        Accede a una completa base de datos de ejercicios con instrucciones detalladas y recomendaciones.
+      </p>
     </div>
     
+    <div className="grid gap-4">
+      {["Fuerza", "Cardio", "Flexibilidad", "Balance"].map((category) => (
+        <Card key={category} className="p-4">
+          <h4 className="font-semibold mb-2">{category}</h4>
+          <p className="text-sm text-muted-foreground">
+            Descubre ejercicios específicos para {category.toLowerCase()} y mejora tu rendimiento.
+          </p>
+        </Card>
+      ))}
+    </div>
+  </div>
+);
+
+const NutritionContent = () => (
+  <div className="space-y-6">
     <div>
-      <h3 className="text-lg font-semibold mb-2">Consultas recomendadas</h3>
-      <ul className="list-disc pl-6 space-y-2">
-        <li><strong>Ejercicios:</strong> "¿Cómo hago correctamente una sentadilla?"</li>
-        <li><strong>Nutrición:</strong> "¿Cuánta proteína necesito al día?"</li>
-        <li><strong>Planes:</strong> "Necesito una rutina para ganar fuerza"</li>
-        <li><strong>Lesiones:</strong> "Tengo dolor en la rodilla al correr"</li>
-        <li><strong>Progreso:</strong> "¿Cómo puedo superar mi estancamiento en press de banca?"</li>
-      </ul>
+      <h3 className="text-xl font-semibold mb-3">Guía Nutricional</h3>
+      <p className="text-muted-foreground mb-4">
+        Información detallada sobre nutrición deportiva y planes alimenticios.
+      </p>
     </div>
     
-    <div>
-      <h3 className="text-lg font-semibold mb-2">Cambio de idioma</h3>
-      <p>Puedes cambiar entre español e inglés usando los botones de idioma en la parte superior del chat.</p>
-    </div>
-    
-    <div>
-      <h3 className="text-lg font-semibold mb-2">Historial</h3>
-      <p>Todas tus conversaciones se guardan automáticamente en la pestaña "Historial" para que puedas revisarlas más tarde.</p>
+    <div className="grid gap-4">
+      {[
+        "Macronutrientes",
+        "Suplementación",
+        "Pre-entreno",
+        "Post-entreno"
+      ].map((topic) => (
+        <Card key={topic} className="p-4">
+          <h4 className="font-semibold mb-2">{topic}</h4>
+          <p className="text-sm text-muted-foreground">
+            Aprende sobre {topic.toLowerCase()} y optimiza tu nutrición.
+          </p>
+        </Card>
+      ))}
     </div>
   </div>
 );
